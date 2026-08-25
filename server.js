@@ -8,6 +8,7 @@ const __dirname = path.dirname(__filename);
 
 const app = express();
 const PORT = Number.parseInt(process.env.PORT || '3000', 10);
+const SERVER_BITRIX_WEBHOOK = String(process.env.BITRIX24_WEBHOOK_URL || '').trim();
 const BITRIX_TIMEOUT_MS = Math.min(
   30000,
   Math.max(1000, Number.parseInt(process.env.BITRIX_PROXY_TIMEOUT_MS || '12000', 10) || 12000)
@@ -24,13 +25,31 @@ app.use((req, res, next) => {
 app.use(express.json({ limit: '20mb' }));
 app.use(express.urlencoded({ extended: true, limit: '20mb' }));
 
-// Bitrix24 API proxy. Target validation is intentionally strict to prevent SSRF.
+app.get('/api/health', (req, res) => {
+  res.json({
+    ok: true,
+    service: 'atlasgr-mesa-sdr',
+    bitrixConfigured: Boolean(SERVER_BITRIX_WEBHOOK)
+  });
+});
+
+app.get('/api/config', (req, res) => {
+  res.json({
+    bitrixProxy: true,
+    bitrixConfigured: Boolean(SERVER_BITRIX_WEBHOOK),
+    legacyDirectBitrixDefault: false
+  });
+});
+
+// Bitrix24 API proxy. Server configuration takes precedence so the browser
+// does not need to know or persist the production webhook secret.
 app.post('/api/bitrix-proxy', async (req, res) => {
   const { webhookUrl, method, params } = req.body || {};
+  const effectiveWebhook = SERVER_BITRIX_WEBHOOK || webhookUrl;
 
   let targetUrl;
   try {
-    targetUrl = buildBitrixTargetUrl(webhookUrl, method);
+    targetUrl = buildBitrixTargetUrl(effectiveWebhook, method);
   } catch (error) {
     return res.status(400).json({
       success: false,

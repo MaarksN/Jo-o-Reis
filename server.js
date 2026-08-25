@@ -239,6 +239,10 @@ app.use('/js', express.static(path.join(__dirname, 'js'), { index: false, dotfil
 
 app.get('*', serveApp);
 
-app.listen(PORT, '0.0.0.0', () => {
-  console.log(`AtlasGR Mesa SDR Server running on http://0.0.0.0:${PORT}`);
-});
+export { app };
+
+if (process.argv[1] && path.resolve(process.argv[1]) === __filename) {
+  app.listen(PORT, '0.0.0.0', () => {
+    console.log(`AtlasGR Mesa SDR Server running on http://0.0.0.0:${PORT}`);
+  });
+}

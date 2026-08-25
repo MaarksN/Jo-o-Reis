@@ -1,0 +1,10 @@
+{
+  "name": "AtlasGR • Mesa de Tratamento SDR",
+  "description": "Mesa de Tratamento SDR com Pomodoro e integração Bitrix24",
+  "requestFramePermissions": [
+    "microphone"
+  ],
+  "majorCapabilities": [
+    "MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"
+  ]
+}

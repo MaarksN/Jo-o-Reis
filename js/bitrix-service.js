@@ -1,94 +1,140 @@
 /**
  * AtlasGR • Bitrix24 Service
- * Dedicated client service for connecting SDR table data with Bitrix24 REST API.
- * Supports direct REST calls and server-side fallback proxy to bypass CORS.
+ * Client service for the SDR desk.
+ * Secure default: use the same-origin server proxy. Direct browser calls are legacy opt-in only.
  */
 
 class BitrixService {
   constructor() {
     this.sdrId = '392';
+    this.proxyEndpoint = '/api/bitrix-proxy';
+    this.requestTimeoutMs = 12000;
+    this.webhookStorageKey = 'atlas-extrator-bitrix-webhook';
+    this.legacyDirectModeKey = 'atlas-bitrix-legacy-direct-mode';
   }
 
   getWebhookUrl() {
     const el = document.getElementById('hook');
     const inputVal = el ? el.value.trim() : '';
-    const storedVal = localStorage.getItem('atlas-extrator-bitrix-webhook') || '';
+    const storedVal = localStorage.getItem(this.webhookStorageKey) || '';
     return inputVal || storedVal;
+  }
+
+  setWebhook(url) {
+    const raw = String(url || '').trim();
+    const el = document.getElementById('hook');
+
+    if (!raw) {
+      localStorage.removeItem(this.webhookStorageKey);
+      if (el) el.value = '';
+      return '';
+    }
+
+    const normalized = this.normalizeWebhook(raw);
+    localStorage.setItem(this.webhookStorageKey, normalized);
+    if (el) el.value = normalized;
+    return normalized;
   }
 
   normalizeWebhook(url) {
     const raw = String(url || '').trim().replace(/\/+$/, '').replace(/\/[a-z0-9_.]+\.json.*$/i, '');
     if (!raw) {
-      throw new Error('Nenhum webhook do Bitrix24 configurado. Insira o webhook no topo da tela.');
+      throw new Error('Nenhum webhook do Bitrix24 configurado. Use o servidor com BITRIX24_WEBHOOK_URL ou configure o webhook explicitamente.');
     }
-    if (!/^https:\/\/[^/]+\/rest\/\d+\/[^/]+$/i.test(raw)) {
-      throw new Error('Webhook com formato inválido. Deve seguir o padrão: https://portal.bitrix24.../rest/USUARIO/TOKEN/');
+    if (!/^https:\/\/atlasgr\.bitrix24\.com\.br\/rest\/\d+\/[A-Za-z0-9_-]{8,}$/i.test(raw)) {
+      throw new Error('Webhook inválido. O cliente aceita apenas o portal AtlasGR via HTTPS.');
     }
     return raw;
   }
 
+  validateMethod(method) {
+    const normalized = String(method || '').trim();
+    if (!/^[A-Za-z][A-Za-z0-9_.]{1,80}$/.test(normalized)) {
+      throw new Error('Método Bitrix24 inválido.');
+    }
+    return normalized;
+  }
+
+  isLegacyDirectModeEnabled() {
+    return localStorage.getItem(this.legacyDirectModeKey) === 'true';
+  }
+
+  async fetchWithTimeout(url, options) {
+    const controller = new AbortController();
+    const timeout = setTimeout(() => controller.abort(), this.requestTimeoutMs);
+    try {
+      return await fetch(url, { ...options, signal: controller.signal });
+    } finally {
+      clearTimeout(timeout);
+    }
+  }
+
   async call(method, params = {}) {
-    const webhook = this.normalizeWebhook(this.getWebhookUrl());
+    const safeMethod = this.validateMethod(method);
+    const rawWebhook = this.getWebhookUrl();
+    const webhook = rawWebhook ? this.normalizeWebhook(rawWebhook) : '';
     const startTime = Date.now();
     let result = null;
     let error = null;
     let latency = 0;
 
-    // Strategy 1: Direct fetch from browser
+    // Strategy 1 (default): same-origin proxy. If BITRIX24_WEBHOOK_URL exists on the
+    // server, no webhook secret needs to be sent or persisted by the browser.
     try {
-      const targetUrl = `${webhook}/${method}.json`;
-      const response = await fetch(targetUrl, {
+      const body = { method: safeMethod, params };
+      if (webhook) body.webhookUrl = webhook;
+
+      const proxyResponse = await this.fetchWithTimeout(this.proxyEndpoint, {
         method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'Accept': 'application/json'
-        },
-        body: JSON.stringify(params)
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(body)
       });
 
-      const data = await response.json().catch(() => ({}));
+      const proxyData = await proxyResponse.json().catch(() => ({}));
       latency = Date.now() - startTime;
 
-      if (response.ok && !data.error) {
-        result = data;
+      if (proxyResponse.ok && proxyData.success) {
+        result = proxyData;
       } else {
-        throw new Error(data.error_description || data.error || `HTTP ${response.status}`);
+        throw new Error(proxyData.error || `Proxy Bitrix indisponível (HTTP ${proxyResponse.status})`);
       }
-    } catch (directErr) {
-      // Strategy 2: Fallback to local server proxy (/api/bitrix-proxy)
-      try {
-        const proxyResponse = await fetch('/api/bitrix-proxy', {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json'
-          },
-          body: JSON.stringify({
-            webhookUrl: webhook,
-            method,
-            params
-          })
-        });
+    } catch (proxyErr) {
+      // Strategy 2: compatibility only. Disabled by default because it exposes the
+      // webhook token to browser runtime, extensions and XSS.
+      if (!this.isLegacyDirectModeEnabled() || !webhook) {
+        error = proxyErr;
+      } else {
+        try {
+          const targetUrl = `${webhook}/${safeMethod}.json`;
+          const response = await this.fetchWithTimeout(targetUrl, {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+              Accept: 'application/json'
+            },
+            body: JSON.stringify(params)
+          });
 
-        const proxyData = await proxyResponse.json().catch(() => ({}));
-        latency = Date.now() - startTime;
+          const data = await response.json().catch(() => ({}));
+          latency = Date.now() - startTime;
 
-        if (proxyResponse.ok && proxyData.success) {
-          result = proxyData;
-        } else {
-          error = new Error(proxyData.error || directErr.message || 'Falha na requisição Bitrix24');
+          if (response.ok && !data.error) {
+            result = data;
+          } else {
+            error = new Error(data.error_description || data.error || `HTTP ${response.status}`);
+          }
+        } catch (directErr) {
+          latency = Date.now() - startTime;
+          error = directErr;
         }
-      } catch (proxyErr) {
-        latency = Date.now() - startTime;
-        error = directErr;
       }
     }
 
-    // Log to Storage Manager
     const logEntry = {
-      method,
+      method: safeMethod,
       status: error ? 'ERRO' : 'SUCESSO',
       latency,
-      details: params ? JSON.stringify(params).slice(0, 150) : '',
+      details: params && typeof params === 'object' ? `campos: ${Object.keys(params).slice(0, 12).join(', ')}` : '',
       error: error ? error.message : null
     };
     if (window.storageManager) {
@@ -105,7 +151,6 @@ class BitrixService {
   async testConnection(leadId = null) {
     const start = Date.now();
     try {
-      // Test by reading lead or user profile
       let res;
       if (leadId) {
         res = await this.call('crm.item.get', { entityTypeId: 1, id: Number(leadId) });

@@ -18,6 +18,16 @@ test('runtime HTML removes hardcoded passwords and switches to server auth', () 
   assert.match(secureHtml, /credentials:'same-origin'/);
 });
 
+test('runtime HTML removes direct Bitrix fallback and supports server-only webhook mode', () => {
+  const secureHtml = transformRuntimeHtml(legacyHtml);
+
+  assert.equal(secureHtml.includes('fetch(`${normHook()}/${method}.json`'), false);
+  assert.match(secureHtml, /Serviço Bitrix seguro indisponível/);
+  assert.match(secureHtml, /window\.bitrixService\.testConnection\(\)/);
+  assert.equal(secureHtml.includes("throw Error('Digite o webhook primeiro.')"), false);
+  assert.match(secureHtml, /res\.latency/);
+});
+
 test('runtime transform fails closed if the legacy signature drifts', () => {
   assert.throws(
     () => transformRuntimeHtml('<html><body>unexpected build</body></html>'),

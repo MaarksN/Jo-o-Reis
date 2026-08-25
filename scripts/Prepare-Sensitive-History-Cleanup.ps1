@@ -33,11 +33,11 @@ if ($status) {
 
 $filterRepoAvailable = $false
 try {
-  git filter-repo --help *> $null
-  $filterRepoAvailable = $true
+  $filterRepoVersion = (git filter-repo --version 2>$null | Out-String).Trim()
+  if ($LASTEXITCODE -eq 0) { $filterRepoAvailable = $true }
 } catch {}
 if (-not $filterRepoAvailable) {
-  throw 'git-filter-repo não está disponível. Instale-o antes de continuar.'
+  throw 'git-filter-repo não está disponível. Instale a versão recente recomendada pelo GitHub antes de continuar.'
 }
 
 $targetPath = Join-Path $repoRoot $Target
@@ -57,6 +57,7 @@ if (-not (Test-Path $tempSanitized)) { throw 'Falha ao criar a cópia sanitizada
 Write-Host ''
 Write-Host 'Pré-condições aprovadas:' -ForegroundColor Green
 Write-Host "  Repositório: $Repository ($visibility)"
+Write-Host "  git-filter-repo: $filterRepoVersion"
 Write-Host "  Arquivo a remover de todo o histórico: $Target"
 Write-Host "  Backup offline planejado: $backup"
 Write-Host "  Cópia sanitizada temporária: $tempSanitized"

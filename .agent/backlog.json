@@ -2,7 +2,7 @@
   "schemaVersion": 1,
   "repository": "maarkss1/Jo-o-Reis",
   "baselineCommit": "58fedf5116b6f827a3492c0114f3c727d83c325a",
-  "updatedAt": "2026-08-25T04:08:00Z",
+  "updatedAt": "2026-08-25T04:12:00Z",
   "items": [
     {
       "id": "ITEM-0001",
@@ -75,16 +75,16 @@
       "complexity": 2,
       "risk": 2,
       "state": "IMPLEMENTADO COM PROBLEMAS",
-      "status": "PARTIAL",
+      "status": "DONE",
       "wave": 0,
       "dependencies": ["ITEM-0003"],
-      "relatedFiles": ["package.json", "test/runtime-html.test.js"],
+      "relatedFiles": ["package.json", "test/runtime-html.test.js", "test/server-smoke.test.js", "server.js"],
       "acceptance": [
         "Build falha diante de erro sintático",
         "Gate valida a transformação estrutural do HTML real",
         "Smoke test HTTP do servidor é automatizado"
       ],
-      "evidence": "Build executa checagem sintática e testes exercitam o HTML real; smoke test HTTP completo ainda pendente."
+      "evidence": "Checagem sintática, transformação do HTML real e smoke tests HTTP fazem parte do gate executado com sucesso no GitHub Actions."
     },
     {
       "id": "ITEM-0005",

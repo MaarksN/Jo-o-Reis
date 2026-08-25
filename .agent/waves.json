@@ -1,0 +1,25 @@
+{
+  "schemaVersion": 1,
+  "currentWave": 0,
+  "waves": [
+    {
+      "id": 0,
+      "name": "Baseline e Governança",
+      "status": "IN_PROGRESS",
+      "items": ["ITEM-0002", "ITEM-0003", "ITEM-0004"],
+      "gate": {
+        "lint": "PENDING_CI",
+        "test": "PENDING_CI",
+        "build": "PENDING_CI",
+        "security": "PASS_STATIC_REVIEW"
+      }
+    },
+    {
+      "id": 1,
+      "name": "Fundação e Segurança",
+      "status": "PLANNED",
+      "items": ["ITEM-0001", "ITEM-0005", "ITEM-0006", "ITEM-0007"],
+      "dependsOn": [0]
+    }
+  ]
+}

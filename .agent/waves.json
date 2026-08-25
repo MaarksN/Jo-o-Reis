@@ -1,0 +1,26 @@
+{
+  "schemaVersion": 1,
+  "currentWave": 1,
+  "waves": [
+    {
+      "id": 0,
+      "name": "Baseline e Governança",
+      "status": "DONE",
+      "items": ["ITEM-0002", "ITEM-0003", "ITEM-0004"],
+      "gate": {
+        "lint": "PASS",
+        "test": "PASS",
+        "build": "PASS",
+        "security": "PASS_STATIC_REVIEW",
+        "ciRunId": 32806952434
+      }
+    },
+    {
+      "id": 1,
+      "name": "Fundação e Segurança",
+      "status": "IN_PROGRESS",
+      "items": ["ITEM-0001", "ITEM-0005", "ITEM-0006", "ITEM-0007"],
+      "dependsOn": [0]
+    }
+  ]
+}

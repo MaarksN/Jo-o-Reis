@@ -5,9 +5,9 @@
   "scripts": {
     "dev": "node server.js",
     "start": "node server.js",
-    "lint": "node --check server.js && node --check lib/bitrix-security.js && node --check js/bitrix-service.js && node --check js/dashboard-charts.js && node --check js/pomodoro-engine.js && node --check js/storage-manager.js && node --check js/voice-service.js",
+    "lint": "node --check server.js && node --check lib/auth.js && node --check lib/runtime-html.js && node --check lib/bitrix-security.js && node --check lib/bitrix-authorization.js && node --check js/bitrix-service.js && node --check js/dashboard-charts.js && node --check js/pomodoro-engine.js && node --check js/storage-manager.js && node --check js/voice-service.js",
     "test": "node --test",
-    "build": "node --check server.js && node --check lib/bitrix-security.js && echo 'Static app syntax OK'",
+    "build": "node --check server.js && node --check lib/auth.js && node --check lib/runtime-html.js && node --check lib/bitrix-security.js && node --check lib/bitrix-authorization.js && echo 'Static app syntax OK'",
     "check": "npm run lint && npm test && npm run build"
   },
   "engines": {

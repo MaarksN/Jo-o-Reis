@@ -32,9 +32,9 @@ Branch: `agent/wave-0-baseline-security`
    - comando `npm run check`;
    - GitHub Actions para pull requests e `main`.
 
-3. `ITEM-0004` — build fictício substituído parcialmente:
-   - `build` agora executa checagem sintática de servidor e módulo de segurança;
-   - smoke test HTTP e validação estrutural do HTML continuam pendentes.
+3. `ITEM-0004` — build fictício substituído:
+   - `build` passou a executar checagem sintática;
+   - a Wave 1 adicionou validação estrutural do HTML e smoke test HTTP real, concluindo a lacuna original.
 
 ### Evidências
 
@@ -46,11 +46,76 @@ Branch: `agent/wave-0-baseline-security`
 
 ### Gate
 
-O gate local puro de segurança foi desenhado sem exigir credencial externa. O resultado oficial da suíte completa será o status do GitHub Actions da branch/PR.
+CI Wave 0: PASS — run `32806952434`.
 
-### Próximos itens
+---
 
-- `ITEM-0001`: remover autenticação hardcoded e autorização baseada apenas em `localStorage`.
-- `ITEM-0007`: permitir operação segura com webhook somente no servidor.
-- `ITEM-0006`: reduzir risco das dependências CDN e introduzir CSP compatível.
-- `ITEM-0005`: extrair lógica crítica do HTML monolítico para módulos testáveis.
+## Wave 1 — Fundação e Segurança
+
+Branch: `agent/wave-1-foundation-security`
+PR: `#2`
+CI final: `32807822774` — PASS
+
+### Implementações
+
+- Autenticação migrada do modelo puramente client-side para servidor:
+  - credenciais via ambiente;
+  - sessão HMAC com expiração;
+  - cookie HttpOnly + SameSite=Strict;
+  - login fail-closed quando a configuração está ausente;
+  - rate limit básico de tentativas.
+- HTML servido é transformado em memória e falha fechado se as assinaturas legadas mudarem.
+- Senha fixa não é entregue pelo Express.
+- `index.html` do modo estático foi neutralizado para não redirecionar ao login legado.
+- Proxy Bitrix agora:
+  - exige sessão;
+  - valida same-origin;
+  - utiliza allowlist de métodos;
+  - limita `crm.item.*` a Lead;
+  - reserva mudança de responsável ao supervisor;
+  - suporta webhook somente no servidor;
+  - não faz fallback direto do HTML servido.
+- `BitrixService.setWebhook()` foi implementado, corrigindo chamada preexistente para método inexistente.
+- Logs do cliente deixaram de registrar valores completos de parâmetros.
+- `express.static(__dirname)` foi removido; somente `/js` é exposto como estático pelo servidor.
+- CSP e headers HTTP de hardening foram adicionados.
+- Servidor tornou-se importável para smoke tests.
+
+### Testes adicionados
+
+- `test/auth.test.js`
+- `test/bitrix-authorization.test.js`
+- `test/bitrix-client-policy.test.js`
+- `test/runtime-html.test.js`
+- `test/server-smoke.test.js`
+
+Cobertura funcional dos novos testes inclui autenticação, assinatura/tamper de sessão, SSRF, allowlist Bitrix, RBAC, política proxy-first, ausência do fallback direto, transformação do HTML real, health check e bloqueio de proxy anônimo.
+
+### Resultado da onda
+
+- `ITEM-0007`: DONE.
+- `ITEM-0001`: PARTIAL — o modo servidor está corrigido, mas o artefato legado ainda existe no repositório.
+- `ITEM-0005`: PARTIAL — segurança crítica foi modularizada; dataset/UI ainda são monolíticos.
+- `ITEM-0006`: PARTIAL — CSP aplicada; dependências CDN ainda precisam SRI ou vendoring local.
+- `ITEM-0008`: BLOCKED — snapshot real de CRM está versionado em repositório público.
+
+### Bloqueio crítico
+
+O HTML monolítico contém dados reais de CRM e o repositório é público. A remediação completa precisa separar o dataset do código e requer decisão explícita sobre armazenamento privado e tratamento do histórico Git já publicado. Nenhuma alteração de visibilidade nem reescrita destrutiva de histórico foi executada automaticamente.
+
+### Gate
+
+Lint: PASS
+Tests: PASS
+Build: PASS
+HTTP smoke: PASS
+Security checks implementados: PASS
+Falhas novas: 0
+
+---
+
+## Wave 2 — UX e Operação SDR
+
+Status: IN_PROGRESS
+
+Inventário inicial iniciado sobre fila sequencial, Pomodoro, voz, atalhos de contato, acessibilidade e feedback visual. A regra de um Lead liberado por vez e ações explícitas no Bitrix será preservada.

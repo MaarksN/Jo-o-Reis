@@ -1,6 +1,6 @@
 {
   "schemaVersion": 1,
-  "currentWave": 1,
+  "currentWave": 2,
   "waves": [
     {
       "id": 0,
@@ -18,9 +18,30 @@
     {
       "id": 1,
       "name": "Fundação e Segurança",
+      "status": "DONE_WITH_BLOCKERS",
+      "items": ["ITEM-0001", "ITEM-0005", "ITEM-0006", "ITEM-0007", "ITEM-0008"],
+      "dependsOn": [0],
+      "summary": {
+        "done": ["ITEM-0007"],
+        "partial": ["ITEM-0001", "ITEM-0005", "ITEM-0006"],
+        "blocked": ["ITEM-0008"]
+      },
+      "gate": {
+        "lint": "PASS",
+        "test": "PASS",
+        "build": "PASS",
+        "smoke": "PASS",
+        "security": "PASS_WITH_RECORDED_BLOCKER",
+        "ciRunId": 32807822774
+      }
+    },
+    {
+      "id": 2,
+      "name": "UX e Operação SDR",
       "status": "IN_PROGRESS",
-      "items": ["ITEM-0001", "ITEM-0005", "ITEM-0006", "ITEM-0007"],
-      "dependsOn": [0]
+      "items": [],
+      "dependsOn": [0, 1],
+      "notes": "Inventariar recursos operacionais existentes antes de criar itens: fila sequencial, Pomodoro, voz, atalhos de contato, acessibilidade e feedback visual."
     }
   ]
 }

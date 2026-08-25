@@ -2,7 +2,7 @@
   "schemaVersion": 1,
   "repository": "maarkss1/Jo-o-Reis",
   "baselineCommit": "58fedf5116b6f827a3492c0114f3c727d83c325a",
-  "updatedAt": "2026-08-25T03:55:00Z",
+  "updatedAt": "2026-08-25T04:12:00Z",
   "items": [
     {
       "id": "ITEM-0001",
@@ -13,16 +13,17 @@
       "complexity": 4,
       "risk": 5,
       "state": "IMPLEMENTADO COM PROBLEMAS",
-      "status": "READY",
+      "status": "PARTIAL",
       "wave": 1,
       "dependencies": [],
-      "relatedFiles": ["Mesa_Tratamento_Joao_Bitrix_Pomodoro_AtlasGR_v1_0.html"],
+      "relatedFiles": ["server.js", "lib/auth.js", "lib/runtime-html.js", "index.html", "Mesa_Tratamento_Joao_Bitrix_Pomodoro_AtlasGR_v1_0.html"],
       "acceptance": [
-        "Nenhuma senha de usuário fica embutida no HTML ou JavaScript entregue ao navegador",
-        "Perfil supervisor não pode ser obtido apenas alterando localStorage",
-        "Falhas de autenticação não revelam segredo nem concedem acesso"
+        "Nenhuma senha de usuário fica embutida no HTML entregue pelo servidor",
+        "Perfil supervisor não pode ser obtido apenas alterando localStorage no modo servidor",
+        "Falhas de autenticação não revelam segredo nem concedem acesso",
+        "Artefato estático legado deixa de conceder acesso privilegiado"
       ],
-      "evidence": "O HTML contém usuários e senha fixa 00000000 em código cliente."
+      "evidence": "Modo servidor agora usa credenciais de ambiente, sessão HMAC em cookie HttpOnly e transformação fail-closed do HTML. O GitHub Pages padrão foi neutralizado, mas o arquivo legado continua versionado e precisa ser removido ou sanitizado para concluir totalmente o item."
     },
     {
       "id": "ITEM-0002",
@@ -43,7 +44,7 @@
         "Método não aceita barra nem path traversal",
         "Requisições externas possuem timeout"
       ],
-      "evidence": "Validação de host, path, método e timeout implementados na branch agent/wave-0-baseline-security."
+      "evidence": "Validação de host, path, método e timeout implementados e aprovados no CI da Wave 0."
     },
     {
       "id": "ITEM-0003",
@@ -57,13 +58,13 @@
       "status": "DONE",
       "wave": 0,
       "dependencies": [],
-      "relatedFiles": ["package.json", ".github/workflows/ci.yml", "test/bitrix-security.test.js"],
+      "relatedFiles": ["package.json", ".github/workflows/ci.yml", "test/"],
       "acceptance": [
         "Existe comando npm test",
         "Existe gate npm run check",
         "Pull requests executam CI automaticamente"
       ],
-      "evidence": "Node test runner e workflow CI adicionados."
+      "evidence": "Node test runner e workflow CI adicionados e executando em PRs."
     },
     {
       "id": "ITEM-0004",
@@ -74,15 +75,16 @@
       "complexity": 2,
       "risk": 2,
       "state": "IMPLEMENTADO COM PROBLEMAS",
-      "status": "PARTIAL",
+      "status": "DONE",
       "wave": 0,
       "dependencies": ["ITEM-0003"],
-      "relatedFiles": ["package.json"],
+      "relatedFiles": ["package.json", "test/runtime-html.test.js", "test/server-smoke.test.js", "server.js"],
       "acceptance": [
         "Build falha diante de erro sintático",
-        "Gate futuro valida também estrutura do HTML e smoke test do servidor"
+        "Gate valida a transformação estrutural do HTML real",
+        "Smoke test HTTP do servidor é automatizado"
       ],
-      "evidence": "Build deixou de ser apenas echo e agora executa node --check; smoke test ainda pendente."
+      "evidence": "Checagem sintática, transformação do HTML real e smoke tests HTTP fazem parte do gate executado com sucesso no GitHub Actions."
     },
     {
       "id": "ITEM-0005",
@@ -93,15 +95,15 @@
       "complexity": 5,
       "risk": 3,
       "state": "IMPLEMENTADO COM PROBLEMAS",
-      "status": "TODO",
+      "status": "PARTIAL",
       "wave": 1,
       "dependencies": ["ITEM-0003"],
-      "relatedFiles": ["Mesa_Tratamento_Joao_Bitrix_Pomodoro_AtlasGR_v1_0.html", "js/"],
+      "relatedFiles": ["Mesa_Tratamento_Joao_Bitrix_Pomodoro_AtlasGR_v1_0.html", "lib/runtime-html.js", "lib/auth.js", "lib/bitrix-security.js", "lib/bitrix-authorization.js", "js/"],
       "acceptance": [
         "Lógica crítica sai do HTML para módulos testáveis",
         "Dataset e apresentação deixam de compartilhar o mesmo bloco monolítico"
       ],
-      "evidence": "Arquivo principal tem aproximadamente 434 KB e concentra dados, UI e lógica."
+      "evidence": "Segurança, autenticação e políticas Bitrix já foram extraídas para módulos testáveis; dataset e grande parte da lógica de UI ainda permanecem no HTML monolítico."
     },
     {
       "id": "ITEM-0006",
@@ -112,15 +114,15 @@
       "complexity": 3,
       "risk": 4,
       "state": "IMPLEMENTADO COM PROBLEMAS",
-      "status": "TODO",
+      "status": "PARTIAL",
       "wave": 1,
       "dependencies": ["ITEM-0003"],
-      "relatedFiles": ["Mesa_Tratamento_Joao_Bitrix_Pomodoro_AtlasGR_v1_0.html"],
+      "relatedFiles": ["server.js", "Mesa_Tratamento_Joao_Bitrix_Pomodoro_AtlasGR_v1_0.html"],
       "acceptance": [
         "Dependências externas possuem estratégia de integridade/pinning ou são servidas localmente",
         "Política CSP compatível é definida"
       ],
-      "evidence": "React, ReactDOM, PropTypes e Recharts são carregados de unpkg no HTML."
+      "evidence": "CSP foi adicionada no servidor, mas React, ReactDOM, PropTypes e Recharts ainda dependem de unpkg sem SRI/local vendoring."
     },
     {
       "id": "ITEM-0007",
@@ -131,16 +133,37 @@
       "complexity": 4,
       "risk": 5,
       "state": "IMPLEMENTADO COM PROBLEMAS",
-      "status": "TODO",
+      "status": "DONE",
       "wave": 1,
       "dependencies": ["ITEM-0002"],
-      "relatedFiles": ["js/bitrix-service.js", "server.js", ".env.example"],
+      "relatedFiles": ["js/bitrix-service.js", "server.js", "lib/runtime-html.js", "lib/bitrix-authorization.js"],
       "acceptance": [
         "Produção pode operar com segredo somente no servidor",
         "Logs e erros nunca retornam token do webhook",
-        "Modo cliente explícito não é confundido com configuração segura de produção"
+        "Modo cliente explícito não é confundido com configuração segura de produção",
+        "Proxy exige autenticação e restringe métodos permitidos"
       ],
-      "evidence": "Serviço cliente lê webhook do input/localStorage e tenta chamada direta antes do proxy."
+      "evidence": "Proxy same-origin é o caminho padrão; fallback direto foi removido do HTML servido, segredo do servidor tem precedência, métodos possuem allowlist e troca de responsável exige supervisor. Gate do PR #2 aprovado."
+    },
+    {
+      "id": "ITEM-0008",
+      "title": "Retirar dados reais de CRM do repositório público",
+      "type": "SEGURANÇA",
+      "priority": "CRITICAL",
+      "impact": 5,
+      "complexity": 5,
+      "risk": 5,
+      "state": "IMPLEMENTADO COM PROBLEMAS",
+      "status": "BLOCKED",
+      "wave": 1,
+      "dependencies": ["ITEM-0005"],
+      "relatedFiles": ["Mesa_Tratamento_Joao_Bitrix_Pomodoro_AtlasGR_v1_0.html"],
+      "acceptance": [
+        "Dados pessoais e comerciais reais não ficam versionados em repositório público",
+        "Dataset operacional é carregado de fonte autenticada ou armazenamento privado",
+        "Histórico Git contendo dados sensíveis recebe estratégia explícita de remediação"
+      ],
+      "evidence": "O HTML versionado contém snapshot de CRM com dados de contatos e está em repositório público. A correção completa exige decidir a fonte privada do dataset e, para histórico já publicado, uma ação de governança sobre visibilidade/reescrita do histórico."
     }
   ]
 }

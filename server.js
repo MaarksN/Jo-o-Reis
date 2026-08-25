@@ -1,36 +1,57 @@
 import express from 'express';
 import path from 'path';
 import { fileURLToPath } from 'url';
+import { buildBitrixTargetUrl } from './lib/bitrix-security.js';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
 const app = express();
-const PORT = 3000;
+const PORT = Number.parseInt(process.env.PORT || '3000', 10);
+const BITRIX_TIMEOUT_MS = Math.min(
+  30000,
+  Math.max(1000, Number.parseInt(process.env.BITRIX_PROXY_TIMEOUT_MS || '12000', 10) || 12000)
+);
 
+app.disable('x-powered-by');
+app.use((req, res, next) => {
+  res.setHeader('X-Content-Type-Options', 'nosniff');
+  res.setHeader('X-Frame-Options', 'DENY');
+  res.setHeader('Referrer-Policy', 'no-referrer');
+  res.setHeader('Permissions-Policy', 'geolocation=(), camera=(), microphone=(self)');
+  next();
+});
 app.use(express.json({ limit: '20mb' }));
 app.use(express.urlencoded({ extended: true, limit: '20mb' }));
 
-// Bitrix24 API Proxy to handle potential CORS issues from client
+// Bitrix24 API proxy. Target validation is intentionally strict to prevent SSRF.
 app.post('/api/bitrix-proxy', async (req, res) => {
-  const { webhookUrl, method, params } = req.body;
-  if (!webhookUrl || !method) {
-    return res.status(400).json({ error: 'webhookUrl and method are required' });
+  const { webhookUrl, method, params } = req.body || {};
+
+  let targetUrl;
+  try {
+    targetUrl = buildBitrixTargetUrl(webhookUrl, method);
+  } catch (error) {
+    return res.status(400).json({
+      success: false,
+      error: error.message || 'Invalid Bitrix24 request'
+    });
   }
 
+  const controller = new AbortController();
+  const timeout = setTimeout(() => controller.abort(), BITRIX_TIMEOUT_MS);
+  const startTime = Date.now();
+
   try {
-    const cleanHook = String(webhookUrl).trim().replace(/\/+$/, '').replace(/\/[a-z0-9_.]+\.json.*$/i, '');
-    const targetUrl = `${cleanHook}/${method}.json`;
-    
-    const startTime = Date.now();
     const response = await fetch(targetUrl, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
-        'Accept': 'application/json',
+        Accept: 'application/json',
         'User-Agent': 'AtlasGR-MesaSDR/1.0'
       },
-      body: JSON.stringify(params || {})
+      body: JSON.stringify(params || {}),
+      signal: controller.signal
     });
 
     const data = await response.json().catch(() => ({}));
@@ -53,23 +74,23 @@ app.post('/api/bitrix-proxy', async (req, res) => {
       latency,
       status: response.status
     });
-  } catch (err) {
-    return res.status(500).json({
+  } catch (error) {
+    const timedOut = error?.name === 'AbortError';
+    return res.status(timedOut ? 504 : 502).json({
       success: false,
-      error: err.message || 'Internal proxy error'
+      error: timedOut ? 'Bitrix24 request timed out' : 'Bitrix24 proxy request failed'
     });
+  } finally {
+    clearTimeout(timeout);
   }
 });
 
-// Serve Mesa HTML at root
 app.get('/', (req, res) => {
   res.sendFile(path.join(__dirname, 'Mesa_Tratamento_Joao_Bitrix_Pomodoro_AtlasGR_v1_0.html'));
 });
 
-// Serve static assets from directory
 app.use(express.static(__dirname));
 
-// Fallback for any other route
 app.get('*', (req, res) => {
   res.sendFile(path.join(__dirname, 'Mesa_Tratamento_Joao_Bitrix_Pomodoro_AtlasGR_v1_0.html'));
 });
@@ -77,4 +98,3 @@ app.get('*', (req, res) => {
 app.listen(PORT, '0.0.0.0', () => {
   console.log(`AtlasGR Mesa SDR Server running on http://0.0.0.0:${PORT}`);
 });
-

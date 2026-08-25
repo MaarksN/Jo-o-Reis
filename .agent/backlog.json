@@ -1,0 +1,146 @@
+{
+  "schemaVersion": 1,
+  "repository": "maarkss1/Jo-o-Reis",
+  "baselineCommit": "58fedf5116b6f827a3492c0114f3c727d83c325a",
+  "updatedAt": "2026-08-25T03:55:00Z",
+  "items": [
+    {
+      "id": "ITEM-0001",
+      "title": "Remover autenticação com credenciais hardcoded no frontend",
+      "type": "SEGURANÇA",
+      "priority": "CRITICAL",
+      "impact": 5,
+      "complexity": 4,
+      "risk": 5,
+      "state": "IMPLEMENTADO COM PROBLEMAS",
+      "status": "READY",
+      "wave": 1,
+      "dependencies": [],
+      "relatedFiles": ["Mesa_Tratamento_Joao_Bitrix_Pomodoro_AtlasGR_v1_0.html"],
+      "acceptance": [
+        "Nenhuma senha de usuário fica embutida no HTML ou JavaScript entregue ao navegador",
+        "Perfil supervisor não pode ser obtido apenas alterando localStorage",
+        "Falhas de autenticação não revelam segredo nem concedem acesso"
+      ],
+      "evidence": "O HTML contém usuários e senha fixa 00000000 em código cliente."
+    },
+    {
+      "id": "ITEM-0002",
+      "title": "Bloquear SSRF e destinos arbitrários no proxy Bitrix24",
+      "type": "SEGURANÇA",
+      "priority": "CRITICAL",
+      "impact": 5,
+      "complexity": 2,
+      "risk": 5,
+      "state": "IMPLEMENTADO COM PROBLEMAS",
+      "status": "DONE",
+      "wave": 0,
+      "dependencies": [],
+      "relatedFiles": ["server.js", "lib/bitrix-security.js", "test/bitrix-security.test.js"],
+      "acceptance": [
+        "Apenas host Bitrix permitido pode ser chamado",
+        "Webhook exige HTTPS",
+        "Método não aceita barra nem path traversal",
+        "Requisições externas possuem timeout"
+      ],
+      "evidence": "Validação de host, path, método e timeout implementados na branch agent/wave-0-baseline-security."
+    },
+    {
+      "id": "ITEM-0003",
+      "title": "Criar baseline automatizado de testes e CI",
+      "type": "TESTES",
+      "priority": "HIGH",
+      "impact": 5,
+      "complexity": 2,
+      "risk": 2,
+      "state": "NÃO IMPLEMENTADO",
+      "status": "DONE",
+      "wave": 0,
+      "dependencies": [],
+      "relatedFiles": ["package.json", ".github/workflows/ci.yml", "test/bitrix-security.test.js"],
+      "acceptance": [
+        "Existe comando npm test",
+        "Existe gate npm run check",
+        "Pull requests executam CI automaticamente"
+      ],
+      "evidence": "Node test runner e workflow CI adicionados."
+    },
+    {
+      "id": "ITEM-0004",
+      "title": "Substituir build fictício por validação real",
+      "type": "INFRAESTRUTURA",
+      "priority": "HIGH",
+      "impact": 4,
+      "complexity": 2,
+      "risk": 2,
+      "state": "IMPLEMENTADO COM PROBLEMAS",
+      "status": "PARTIAL",
+      "wave": 0,
+      "dependencies": ["ITEM-0003"],
+      "relatedFiles": ["package.json"],
+      "acceptance": [
+        "Build falha diante de erro sintático",
+        "Gate futuro valida também estrutura do HTML e smoke test do servidor"
+      ],
+      "evidence": "Build deixou de ser apenas echo e agora executa node --check; smoke test ainda pendente."
+    },
+    {
+      "id": "ITEM-0005",
+      "title": "Reduzir acoplamento do HTML monolítico",
+      "type": "ARQUITETURA",
+      "priority": "MEDIUM",
+      "impact": 4,
+      "complexity": 5,
+      "risk": 3,
+      "state": "IMPLEMENTADO COM PROBLEMAS",
+      "status": "TODO",
+      "wave": 1,
+      "dependencies": ["ITEM-0003"],
+      "relatedFiles": ["Mesa_Tratamento_Joao_Bitrix_Pomodoro_AtlasGR_v1_0.html", "js/"],
+      "acceptance": [
+        "Lógica crítica sai do HTML para módulos testáveis",
+        "Dataset e apresentação deixam de compartilhar o mesmo bloco monolítico"
+      ],
+      "evidence": "Arquivo principal tem aproximadamente 434 KB e concentra dados, UI e lógica."
+    },
+    {
+      "id": "ITEM-0006",
+      "title": "Endurecer carregamento de bibliotecas externas",
+      "type": "SEGURANÇA",
+      "priority": "HIGH",
+      "impact": 4,
+      "complexity": 3,
+      "risk": 4,
+      "state": "IMPLEMENTADO COM PROBLEMAS",
+      "status": "TODO",
+      "wave": 1,
+      "dependencies": ["ITEM-0003"],
+      "relatedFiles": ["Mesa_Tratamento_Joao_Bitrix_Pomodoro_AtlasGR_v1_0.html"],
+      "acceptance": [
+        "Dependências externas possuem estratégia de integridade/pinning ou são servidas localmente",
+        "Política CSP compatível é definida"
+      ],
+      "evidence": "React, ReactDOM, PropTypes e Recharts são carregados de unpkg no HTML."
+    },
+    {
+      "id": "ITEM-0007",
+      "title": "Reduzir exposição do webhook Bitrix no navegador",
+      "type": "SEGURANÇA",
+      "priority": "HIGH",
+      "impact": 5,
+      "complexity": 4,
+      "risk": 5,
+      "state": "IMPLEMENTADO COM PROBLEMAS",
+      "status": "TODO",
+      "wave": 1,
+      "dependencies": ["ITEM-0002"],
+      "relatedFiles": ["js/bitrix-service.js", "server.js", ".env.example"],
+      "acceptance": [
+        "Produção pode operar com segredo somente no servidor",
+        "Logs e erros nunca retornam token do webhook",
+        "Modo cliente explícito não é confundido com configuração segura de produção"
+      ],
+      "evidence": "Serviço cliente lê webhook do input/localStorage e tenta chamada direta antes do proxy."
+    }
+  ]
+}

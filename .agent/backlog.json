@@ -2,7 +2,7 @@
   "schemaVersion": 1,
   "repository": "maarkss1/Jo-o-Reis",
   "baselineCommit": "58fedf5116b6f827a3492c0114f3c727d83c325a",
-  "updatedAt": "2026-08-25T04:12:00Z",
+  "updatedAt": "2026-08-25T10:26:00Z",
   "items": [
     {
       "id": "ITEM-0001",
@@ -23,7 +23,7 @@
         "Falhas de autenticação não revelam segredo nem concedem acesso",
         "Artefato estático legado deixa de conceder acesso privilegiado"
       ],
-      "evidence": "Modo servidor agora usa credenciais de ambiente, sessão HMAC em cookie HttpOnly e transformação fail-closed do HTML. O GitHub Pages padrão foi neutralizado, mas o arquivo legado continua versionado e precisa ser removido ou sanitizado para concluir totalmente o item."
+      "evidence": "Modo servidor agora usa credenciais de ambiente, sessão HMAC em cookie HttpOnly e transformação fail-closed do HTML. O GitHub Pages padrão foi neutralizado. A remediação de histórico preparada no PR #4 também sanitiza a declaração de usuários antes de restaurar o shell após a reescrita."
     },
     {
       "id": "ITEM-0002",
@@ -103,7 +103,7 @@
         "Lógica crítica sai do HTML para módulos testáveis",
         "Dataset e apresentação deixam de compartilhar o mesmo bloco monolítico"
       ],
-      "evidence": "Segurança, autenticação e políticas Bitrix já foram extraídas para módulos testáveis; dataset e grande parte da lógica de UI ainda permanecem no HTML monolítico."
+      "evidence": "Segurança, autenticação e políticas Bitrix já foram extraídas para módulos testáveis; dataset e grande parte da lógica de UI ainda permanecem no HTML monolítico. O PR #4 introduz sanitização estrutural e prepara a separação definitiva do snapshot do código."
     },
     {
       "id": "ITEM-0006",
@@ -154,16 +154,26 @@
       "complexity": 5,
       "risk": 5,
       "state": "IMPLEMENTADO COM PROBLEMAS",
-      "status": "BLOCKED",
+      "status": "BLOCKED_EXTERNAL_ACTION",
       "wave": 1,
       "dependencies": ["ITEM-0005"],
-      "relatedFiles": ["Mesa_Tratamento_Joao_Bitrix_Pomodoro_AtlasGR_v1_0.html"],
+      "relatedFiles": [
+        "Mesa_Tratamento_Joao_Bitrix_Pomodoro_AtlasGR_v1_0.html",
+        "lib/sanitize-legacy-html.js",
+        "lib/runtime-html.js",
+        "scripts/sanitize-legacy-html.mjs",
+        "scripts/Prepare-Sensitive-History-Cleanup.ps1",
+        "docs/security/history-remediation.md",
+        "test/sanitize-legacy-html.test.js"
+      ],
       "acceptance": [
         "Dados pessoais e comerciais reais não ficam versionados em repositório público",
         "Dataset operacional é carregado de fonte autenticada ou armazenamento privado",
-        "Histórico Git contendo dados sensíveis recebe estratégia explícita de remediação"
+        "Histórico Git contendo dados sensíveis recebe estratégia explícita de remediação",
+        "Reescrita só pode iniciar depois que a visibilidade estiver PRIVATE",
+        "Force-push destrutivo nunca é executado automaticamente pelo agente ou script"
       ],
-      "evidence": "O HTML versionado contém snapshot de CRM com dados de contatos e está em repositório público. A correção completa exige decidir a fonte privada do dataset e, para histórico já publicado, uma ação de governança sobre visibilidade/reescrita do histórico."
+      "evidence": "PR #4 prepara a remediação completa: sanitizador testado contra o HTML real, runtime compatível com shell sanitizado, dry run e reescrita somente local protegidos por verificação PRIVATE, backup Git bundle e runbook para PR refs/caches/forks. Quality Gate do GitHub Actions passou. O repositório ainda foi verificado como público; resta a mudança de visibilidade e a execução deliberada do procedimento de histórico."
     }
   ]
 }

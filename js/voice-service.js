@@ -20,7 +20,6 @@ class VoiceService {
   formatVoiceText(text) {
     if (!text) return '';
     let s = text.trim();
-    // Replace punctuation verbal triggers
     s = s.replace(/\s+vírgula\b/gi, ',');
     s = s.replace(/\s+ponto final\b/gi, '.');
     s = s.replace(/\s+ponto e vírgula\b/gi, ';');
@@ -28,8 +27,6 @@ class VoiceService {
     s = s.replace(/\s+ponto de interrogação\b/gi, '?');
     s = s.replace(/\s+ponto de exclamação\b/gi, '!');
     s = s.replace(/\s+(novo parágrafo|nova linha|parágrafo)\b/gi, '\n');
-    
-    // Capitalize first letter
     return s.charAt(0).toUpperCase() + s.slice(1);
   }
 
@@ -45,7 +42,12 @@ class VoiceService {
       .trim();
   }
 
-  startDictation(targetElementId = 'note', leadInfo = null) {
+  /**
+   * Supports both contracts:
+   * - startDictation('note', { LEAD_ID, CLIENTE })
+   * - legacy HTML: startDictation(callback, leadId, clientName)
+   */
+  startDictation(targetOrCallback = 'note', leadInfo = null, clientName = null) {
     if (!this.isSupported()) {
       if (window.toast) window.toast('Ditado por voz não é suportado neste navegador. Utilize Google Chrome ou Edge.');
       return;
@@ -56,13 +58,19 @@ class VoiceService {
       return;
     }
 
+    const legacyCallback = typeof targetOrCallback === 'function' ? targetOrCallback : null;
+    const targetElementId = legacyCallback ? null : (targetOrCallback || 'note');
+    const normalizedLeadInfo = legacyCallback
+      ? { LEAD_ID: leadInfo || null, CLIENTE: clientName || 'Atendimento SDR' }
+      : (leadInfo || {});
+
     try {
       this.dictationRecognition = new this.recognitionClass();
       this.dictationRecognition.lang = 'pt-BR';
       this.dictationRecognition.continuous = false;
       this.dictationRecognition.interimResults = true;
 
-      const targetEl = document.getElementById(targetElementId);
+      const targetEl = targetElementId ? document.getElementById(targetElementId) : null;
       const dictationBtn = document.getElementById('dictateBtn') || document.getElementById('voiceNoteBtn');
       const originalBtnText = dictationBtn ? dictationBtn.innerHTML : '';
 
@@ -75,6 +83,7 @@ class VoiceService {
       if (window.toast) window.toast('🎙️ Gravando... Fale o resultado do contato ou observação.');
 
       let finalTranscript = '';
+      let latestText = '';
 
       this.dictationRecognition.onresult = (event) => {
         let interim = '';
@@ -86,10 +95,8 @@ class VoiceService {
           }
         }
 
-        if (targetEl) {
-          const formatted = this.formatVoiceText(finalTranscript + (interim ? ' ' + interim : ''));
-          targetEl.value = formatted;
-        }
+        latestText = this.formatVoiceText(finalTranscript + (interim ? ' ' + interim : ''));
+        if (targetEl) targetEl.value = latestText;
       };
 
       this.dictationRecognition.onend = () => {
@@ -99,11 +106,15 @@ class VoiceService {
           dictationBtn.classList.remove('recording-pulse');
         }
 
-        const finalText = targetEl ? targetEl.value.trim() : '';
+        const finalText = (targetEl ? targetEl.value : latestText || this.formatVoiceText(finalTranscript)).trim();
+        if (legacyCallback && finalText) {
+          legacyCallback(finalText);
+        }
+
         if (finalText && window.storageManager) {
           window.storageManager.addVoiceNote({
-            leadId: leadInfo?.LEAD_ID || (window.current ? window.current()?.LEAD_ID : null),
-            clientName: leadInfo?.CLIENTE || (window.current ? window.current()?.CLIENTE : 'Atendimento SDR'),
+            leadId: normalizedLeadInfo?.LEAD_ID || (window.current ? window.current()?.LEAD_ID : null),
+            clientName: normalizedLeadInfo?.CLIENTE || (window.current ? window.current()?.CLIENTE : 'Atendimento SDR'),
             text: finalText
           });
         }

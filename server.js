@@ -2,7 +2,8 @@ import express from 'express';
 import path from 'path';
 import { readFileSync } from 'fs';
 import { fileURLToPath } from 'url';
-import { buildBitrixTargetUrl } from './lib/bitrix-security.js';
+import { authorizeBitrixRequest } from './lib/bitrix-authorization.js';
+import { buildBitrixTargetUrl, validateBitrixMethod } from './lib/bitrix-security.js';
 import {
   SESSION_COOKIE,
   authenticateUser,
@@ -169,9 +170,11 @@ app.post('/api/bitrix-proxy', requireSameOrigin, requireAuth, async (req, res) =
 
   let targetUrl;
   try {
-    targetUrl = buildBitrixTargetUrl(effectiveWebhook, method);
+    const safeMethod = validateBitrixMethod(method);
+    authorizeBitrixRequest(req.user, safeMethod, params || {});
+    targetUrl = buildBitrixTargetUrl(effectiveWebhook, safeMethod);
   } catch (error) {
-    return res.status(400).json({
+    return res.status(error.status || 400).json({
       success: false,
       error: error.message || 'Invalid Bitrix24 request'
     });

@@ -1,6 +1,6 @@
 /**
  * AtlasGR • Integrated Pomodoro Engine
- * Manages focus cycles, break intervals, audio notifications, lead treatment duration tracking,
+ * Manages focus cycles, break intervals, audio/browser notifications, lead treatment duration tracking,
  * and state persistence across reloads.
  */
 
@@ -57,6 +57,33 @@ class PomodoroEngine {
     }
   }
 
+  requestBrowserNotifications() {
+    const NotificationApi = window.Notification;
+    if (!NotificationApi || NotificationApi.permission !== 'default') return;
+    try {
+      const result = NotificationApi.requestPermission();
+      if (result && typeof result.catch === 'function') result.catch(() => {});
+    } catch (e) {
+      console.warn('[Pomodoro] Browser notification permission error:', e);
+    }
+  }
+
+  notifyBrowser(title, body) {
+    const NotificationApi = window.Notification;
+    if (!NotificationApi || NotificationApi.permission !== 'granted') return false;
+    try {
+      new NotificationApi(title, {
+        body,
+        tag: 'atlasgr-pomodoro',
+        renotify: true
+      });
+      return true;
+    } catch (e) {
+      console.warn('[Pomodoro] Browser notification error:', e);
+      return false;
+    }
+  }
+
   playChime(type = 'focus_end') {
     if (!this.state.settings.soundEnabled) return;
     try {
@@ -65,7 +92,6 @@ class PomodoroEngine {
 
       const now = this.audioCtx.currentTime;
       if (type === 'focus_end') {
-        // High pleasant double chime (Focus Complete -> Break Start)
         [587.33, 880, 1174.66].forEach((freq, i) => {
           const osc = this.audioCtx.createOscillator();
           const gain = this.audioCtx.createGain();
@@ -80,7 +106,6 @@ class PomodoroEngine {
           osc.stop(now + i * 0.12 + 0.85);
         });
       } else if (type === 'break_end') {
-        // Energizing rising melody (Break Complete -> Focus Ready)
         [523.25, 659.25, 783.99, 1046.50].forEach((freq, i) => {
           const osc = this.audioCtx.createOscillator();
           const gain = this.audioCtx.createGain();
@@ -95,7 +120,6 @@ class PomodoroEngine {
           osc.stop(now + i * 0.1 + 0.65);
         });
       } else if (type === 'tick_start') {
-        // Short subtle click
         const osc = this.audioCtx.createOscillator();
         const gain = this.audioCtx.createGain();
         osc.type = 'sine';
@@ -113,11 +137,12 @@ class PomodoroEngine {
   }
 
   startFocus(customMin = null) {
+    this.requestBrowserNotifications();
     this.initAudio();
     this.playChime('tick_start');
     const min = customMin || this.state.settings.focusMin || 25;
     const duration = min * 60;
-    
+
     this.state.phase = 'focus';
     this.state.duration = duration;
     this.state.end = Date.now() + duration * 1000;
@@ -126,8 +151,7 @@ class PomodoroEngine {
     this.state.focusCount = (this.state.focusCount || 0) + 1;
     this.state.cycleIndex = ((this.state.cycleIndex || 0) % (this.state.settings.cyclesBeforeLongBreak || 4)) + 1;
 
-    // Track starting timestamp for active lead
-    this.trackLeadStart();
+    this.trackLeadStart(this.state.currentLeadId);
 
     this.saveState();
     this.render();
@@ -142,7 +166,6 @@ class PomodoroEngine {
     const min = isLongBreak ? (this.state.settings.longBreakMin || 15) : (this.state.settings.shortBreakMin || 5);
     const duration = min * 60;
 
-    // Log the completed focus session
     if (window.storageManager) {
       window.storageManager.logPomodoroSession({
         type: 'focus',
@@ -159,8 +182,12 @@ class PomodoroEngine {
 
     this.saveState();
     this.render();
+    this.notifyBrowser(
+      'AtlasGR • Foco concluído',
+      isLongBreak ? `Hora do descanso longo de ${min} minutos.` : `Hora do descanso de ${min} minutos.`
+    );
     if (window.toast) {
-      window.toast(isLongBreak ? 'Descanso Longo iniciado (15 min) ☕' : 'Descanso de 5 min iniciado 💧');
+      window.toast(isLongBreak ? `Descanso Longo iniciado (${min} min) ☕` : `Descanso de ${min} min iniciado 💧`);
     }
   }
 
@@ -174,6 +201,7 @@ class PomodoroEngine {
 
     this.saveState();
     this.render();
+    this.notifyBrowser('AtlasGR • Descanso concluído', 'A mesa está pronta para o próximo bloco de foco.');
     if (typeof window.render === 'function') {
       window.render();
     }
@@ -190,6 +218,11 @@ class PomodoroEngine {
     this.saveState();
     this.render();
     if (window.toast) window.toast('Cronômetro pausado.');
+  }
+
+  // Compatibility alias used by the legacy HTML wrapper.
+  pause() {
+    return this.pauseTimer();
   }
 
   resumeTimer() {
@@ -237,6 +270,11 @@ class PomodoroEngine {
     this.saveState();
   }
 
+  // Compatibility alias used by boot() and by lead transitions in the HTML.
+  startLeadTimer(leadId = null) {
+    this.trackLeadStart(leadId);
+  }
+
   getLeadDuration() {
     const start = this.activeLeadStartTime || this.state.leadStartTime || Date.now();
     const elapsedSeconds = Math.max(1, Math.round((Date.now() - start) / 1000));
@@ -245,13 +283,15 @@ class PomodoroEngine {
     const formatted = mins > 0 ? `${mins}m ${secs}s` : `${secs}s`;
     return {
       seconds: elapsedSeconds,
-      formatted
+      formatted,
+      durationSeconds: elapsedSeconds,
+      formattedDuration: formatted
     };
   }
 
   canTreat() {
     if (!this.state.settings.strictLock) {
-      return true; // Flexible mode
+      return true;
     }
     return this.state.phase === 'focus' && !this.state.paused && (this.state.end > Date.now());
   }
@@ -303,7 +343,6 @@ class PomodoroEngine {
     if (timerEl) timerEl.textContent = `${mm}:${ss}`;
     if (ringEl) ringEl.style.setProperty('--p', pct);
 
-    // Cycles indicator: e.g. "Ciclo 2 de 4 ● ● ○ ○"
     const currentCycle = this.state.cycleIndex || 1;
     const maxCycles = this.state.settings.cyclesBeforeLongBreak || 4;
     let dots = '';
@@ -366,7 +405,6 @@ class PomodoroEngine {
       breakTimerEl.textContent = `${mm}:${ss}`;
     }
 
-    // Apply treatment button locks
     this.applyLocks();
   }
 
@@ -375,6 +413,11 @@ class PomodoroEngine {
     document.querySelectorAll('.treatment').forEach(b => {
       b.disabled = !allowed;
     });
+  }
+
+  // Compatibility alias used by renderCurrent()/applyTimerLock() in the HTML.
+  applyTimerLock() {
+    return this.applyLocks();
   }
 
   render() {

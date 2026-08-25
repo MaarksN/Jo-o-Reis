@@ -1,6 +1,6 @@
 {
   "name": "AtlasGR • Mesa de Tratamento SDR",
-  "description": "Mesa de Tratamento SDR com Pomodoro e integração Bitrix24",
+  "description": "Mesa de tratamento sequencial para SDR com persistência local de sessões, dashboard com Recharts, ditado por voz, serviço Bitrix24 e temporizador Pomodoro integrado.",
   "requestFramePermissions": [
     "microphone"
   ],
@@ -8,3 +8,4 @@
     "MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"
   ]
 }
+

@@ -173,6 +173,7 @@
   .card-colapsavel.aberto .colapsavel-seta{ transform:rotate(90deg); }
   .colapsavel-corpo{ display:none; margin-top:14px; }
   .card-colapsavel.aberto .colapsavel-corpo{ display:block; }
+  .diaria-cards-linha{ display:grid; grid-template-columns:repeat(auto-fit,minmax(300px,1fr)); gap:16px; align-items:start; }
 
   /* chips de resumo das tarefas (atrasadas / hoje / futuras) */
   .tarefas-chips{ display:flex; flex-wrap:wrap; gap:8px; margin-bottom:12px; }
@@ -181,19 +182,6 @@
   .tarefa-chip.hoje{ background:color-mix(in srgb, var(--gold) 22%, var(--surface-2)); color:#7a5b00; }
   .label-mini{ font-size:10.5px; font-weight:700; text-transform:uppercase; letter-spacing:.04em; color:var(--ink-2); margin-bottom:6px; }
 
-  /* lista de clientes + ação "tratar" */
-  .cliente-lista{ display:flex; flex-direction:column; gap:6px; max-height:520px; overflow-y:auto; }
-  .cliente-row{ border:1px solid var(--line); border-radius:12px; background:var(--surface-2); overflow:hidden; }
-  .cliente-row-topo{ display:flex; align-items:center; gap:10px; padding:9px 12px; cursor:pointer; }
-  .cliente-nome{ flex:1; min-width:0; font-weight:600; font-size:12.5px; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
-  .cliente-status{ font-size:9.5px; font-weight:700; text-transform:uppercase; letter-spacing:.03em; padding:3px 9px; border-radius:20px; background:var(--soft); color:var(--brand); flex-shrink:0; }
-  .cliente-tratar-form{ display:none; flex-direction:column; gap:8px; padding:0 12px 12px; border-top:1px dashed var(--line); margin-top:2px; padding-top:10px; }
-  .cliente-row.aberto .cliente-tratar-form{ display:flex; }
-  .cliente-tratar-form select, .cliente-tratar-form textarea{ font-family:inherit; font-size:12px; padding:7px 9px; border-radius:8px; border:1px solid var(--line); background:var(--surface); color:var(--ink); width:100%; }
-  .cliente-tratar-form textarea{ resize:vertical; min-height:44px; }
-  .cliente-tratar-linha{ display:flex; gap:8px; flex-wrap:wrap; align-items:center; }
-  .cliente-msg{ font-size:11px; color:var(--ink-2); }
-  .cliente-msg.ok{ color:var(--ok-ink); } .cliente-msg.erro{ color:var(--danger-ink); }
   .monitor-ativo{ background:var(--ok) !important; border-color:var(--ok) !important; color:#fff !important; }
 
   /* modal de drill-down — abre por cima da tela, fecha e volta ao estado do card */
@@ -1649,7 +1637,6 @@
     document.getElementById('diariaConteudo').innerHTML = painelMes(chave, tituloMes(chave), p.funil, p.dias, p.canal, p.sla, p.dealsResumo, p.dealsDetalhe, p.met, p.diasUteis, p.origem, p.origemPorEtapa, p.contatoPorOrigem);
     animarPainel(document.getElementById('diariaConteudo'));
     renderizarSemTrabalho(chave, p.sla, painel.drillExtra.slaDet);
-    renderizarClientes(chave, painel.drillExtra.leadsRaw || []);
   }
 
   // -------------------------------------------------------------------
@@ -1670,86 +1657,6 @@
       <div class="drill-lista">${lista || '<p class="nota">Nenhum — todo mundo já teve pelo menos um toque.</p>'}</div>
       ${(slaDet?.semContato || []).length > 60 ? `<p class="nota">+ ${slaDet.semContato.length - 60} outro(s).</p>` : ''}`;
   }
-
-  // -------------------------------------------------------------------
-  // Lista de clientes do mês, com ação "Tratar" pra registrar contato ou
-  // trocar o status do lead direto do Bitrix, sem sair do dashboard.
-  // -------------------------------------------------------------------
-  const CANAIS_TRATAR = ['Ligação', 'WhatsApp', 'E-mail', 'LinkedIn', 'Outro/Tarefa'];
-  function renderizarClientes(chave, leadsRaw){
-    const card = document.getElementById('cardClientes');
-    if (!leadsRaw || !leadsRaw.length) { card.style.display = 'none'; return; }
-    card.style.display = '';
-    const opcoesStatus = Object.entries(NOME_STATUS).map(([cod, label]) => `<option value="${cod}">${label}</option>`).join('');
-    const opcoesCanal = CANAIS_TRATAR.map(c => `<option value="${c}">${c}</option>`).join('');
-    const linhas = leadsRaw.map(l => `
-      <div class="cliente-row" data-lead-id="${l.id}">
-        <div class="cliente-row-topo" data-toggle-cliente="1">
-          <span class="cliente-status">${(NOME_STATUS[l.status] || l.status || '?')}</span>
-          <span class="cliente-nome">${l.nome}</span>
-          <span class="chip" title="Origem">${l.origem || 'Sem origem'}</span>
-          <span style="font-size:10px;color:var(--ink-2);">${l.trabalhado ? '✓ trabalhado' : '— sem contato'}</span>
-        </div>
-        <div class="cliente-tratar-form">
-          <div class="cliente-tratar-linha">
-            <select class="cliente-canal">${opcoesCanal}</select>
-            <textarea class="cliente-nota" placeholder="O que foi feito / combinado (opcional)"></textarea>
-          </div>
-          <div class="cliente-tratar-linha">
-            <button type="button" class="btn-mini principal cliente-btn-registrar">Registrar contato agora</button>
-            <select class="cliente-novo-status" style="max-width:220px;"><option value="">— trocar status —</option>${opcoesStatus}</select>
-            <button type="button" class="btn-mini cliente-btn-status">Salvar status</button>
-          </div>
-          <div class="cliente-msg"></div>
-        </div>
-      </div>`).join('');
-    document.getElementById('clientesBox').innerHTML = `<p class="nota" style="margin-top:0;">${leadsRaw.length} cliente(s) neste mês. Clique num cliente pra registrar um contato ou trocar o status direto no Bitrix.</p><div class="cliente-lista">${linhas}</div>`;
-  }
-
-  document.getElementById('clientesBox').addEventListener('click', async (ev) => {
-    const topo = ev.target.closest('[data-toggle-cliente]');
-    const row = ev.target.closest('.cliente-row');
-    if (!row) return;
-    const webhook = document.getElementById('webhookDiario').value.trim();
-    if (topo && !ev.target.closest('.cliente-tratar-form')) { row.classList.toggle('aberto'); return; }
-
-    const msgEl = row.querySelector('.cliente-msg');
-    const leadId = row.dataset.leadId;
-
-    if (ev.target.classList.contains('cliente-btn-registrar')) {
-      if (!validarWebhookJoao(webhook)) { msgEl.textContent = 'Cole e salve um webhook válido acima primeiro.'; msgEl.className = 'cliente-msg erro'; return; }
-      const canal = row.querySelector('.cliente-canal').value;
-      const nota = row.querySelector('.cliente-nota').value.trim();
-      ev.target.disabled = true;
-      msgEl.textContent = 'Registrando no Bitrix…'; msgEl.className = 'cliente-msg';
-      try {
-        await bxChamar(webhook, 'crm.activity.add', { fields: {
-          OWNER_TYPE_ID: 1, OWNER_ID: leadId, TYPE_ID: 4, SUBJECT: `${canal}${nota ? ' — ' + nota : ''}`,
-          RESPONSIBLE_ID: JOAO_USER_ID, COMPLETED: 'Y', DIRECTION: 2,
-          START_TIME: new Date().toISOString(), END_TIME: new Date().toISOString(),
-        }});
-        msgEl.textContent = '✓ Contato registrado no Bitrix.'; msgEl.className = 'cliente-msg ok';
-        row.querySelector('.cliente-nota').value = '';
-      } catch (e) { msgEl.textContent = 'Falha: ' + e.message; msgEl.className = 'cliente-msg erro'; }
-      finally { ev.target.disabled = false; }
-    }
-
-    if (ev.target.classList.contains('cliente-btn-status')) {
-      const novoStatus = row.querySelector('.cliente-novo-status').value;
-      if (!novoStatus) { msgEl.textContent = 'Escolha um status novo primeiro.'; msgEl.className = 'cliente-msg erro'; return; }
-      if (!validarWebhookJoao(webhook)) { msgEl.textContent = 'Cole e salve um webhook válido acima primeiro.'; msgEl.className = 'cliente-msg erro'; return; }
-      ev.target.disabled = true;
-      msgEl.textContent = 'Atualizando status no Bitrix…'; msgEl.className = 'cliente-msg';
-      try {
-        await bxChamar(webhook, 'crm.lead.update', { id: leadId, fields: { STATUS_ID: novoStatus } });
-        row.querySelector('.cliente-status').textContent = NOME_STATUS[novoStatus] || novoStatus;
-        msgEl.textContent = '✓ Status atualizado no Bitrix.'; msgEl.className = 'cliente-msg ok';
-      } catch (e) { msgEl.textContent = 'Falha: ' + e.message; msgEl.className = 'cliente-msg erro'; }
-      finally { ev.target.disabled = false; }
-    }
-  });
-
-  document.getElementById('btnAtualizarClientes').addEventListener('click', () => extrairDiaria());
 
   function salvarCacheAoVivo(chave, painel, quando){
     let cache = {};
@@ -1941,7 +1848,6 @@
       document.getElementById('diariaConteudo').innerHTML = painelMes(chave, tituloMes(chave), p.funil, p.dias, p.canal, p.sla, p.dealsResumo, p.dealsDetalhe, p.met, p.diasUteis, p.origem, p.origemPorEtapa, p.contatoPorOrigem);
       atualizarLiveBadge(cacheDoMes.extraidoEm);
       renderizarSemTrabalho(chave, p.sla, cacheDoMes.drillExtra.slaDet);
-      renderizarClientes(chave, cacheDoMes.drillExtra.leadsRaw || []);
     } else {
       document.getElementById('diariaConteudo').innerHTML = `<div class="placeholder-vazio"><div class="p-icon">${svgIcone('sun')}</div><h4>Ainda sem extração de ${tituloMes(chave)}</h4><p>Cole o webhook do Bitrix24 acima e clique em "Extrair agora" pra carregar leads, atividades e o calendário do mês corrente.</p></div>`;
     }

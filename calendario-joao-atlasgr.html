@@ -389,44 +389,38 @@
   <div class="tab-cards" id="visaoCards"></div>
 
   <div id="visao-diaria" class="visao-painel ativo">
-    <section class="card">
-      <div class="card-head"><h3>🔑 Conexão com o Bitrix24</h3><span class="live-badge" id="liveBadge"><span class="dot"></span><span id="liveBadgeTexto">nunca extraído</span></span></div>
-      <div class="conexao-box">
-        <div class="campo">
-          <label for="webhookDiario">URL do webhook de entrada (Bitrix24 · AtlasGR)</label>
-          <input type="password" id="webhookDiario" placeholder="https://atlasgr.bitrix24.com.br/rest/.../" autocomplete="off">
+    <div class="diaria-cards-linha">
+      <section class="card">
+        <div class="card-head"><h3>🔑 Conexão com o Bitrix24</h3><span class="live-badge" id="liveBadge"><span class="dot"></span><span id="liveBadgeTexto">nunca extraído</span></span></div>
+        <div class="conexao-box">
+          <div class="campo">
+            <label for="webhookDiario">URL do webhook de entrada (Bitrix24 · AtlasGR)</label>
+            <input type="password" id="webhookDiario" placeholder="https://atlasgr.bitrix24.com.br/rest/.../" autocomplete="off">
+          </div>
+          <button type="button" class="btn-mini" id="btnMostrarWebhook">mostrar</button>
+          <button type="button" class="btn-mini" id="btnSalvarWebhook">💾 Salvar</button>
+          <button type="button" class="btn-mini principal" id="btnExtrairDiario"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M23 4v6h-6M1 20v-6h6"/><path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15"/></svg> Extrair agora</button>
+          <button type="button" class="btn-mini" id="btnMonitor"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 3"/></svg> Monitor ao vivo (15 em 15 min)</button>
+          <a href="http://localhost:3000/" target="_blank" rel="noopener" class="btn-mini">🖥️ Abrir Mesa de Tratamento</a>
+          <div class="conexao-msg" id="conexaoMsg">Cole o webhook do Bitrix24 (leitura de CRM) e clique em Extrair. Ele fica salvo só neste navegador e a extração se repete sozinha 1x por dia ao abrir a página. O webhook é compartilhado com a Mesa de Tratamento (cole uma vez, funciona nas duas).</div>
         </div>
-        <button type="button" class="btn-mini" id="btnMostrarWebhook">mostrar</button>
-        <button type="button" class="btn-mini" id="btnSalvarWebhook">💾 Salvar</button>
-        <button type="button" class="btn-mini principal" id="btnExtrairDiario"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M23 4v6h-6M1 20v-6h6"/><path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15"/></svg> Extrair agora</button>
-        <button type="button" class="btn-mini" id="btnMonitor"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 3"/></svg> Monitor ao vivo (15 em 15 min)</button>
-        <a href="http://localhost:3000/" target="_blank" rel="noopener" class="btn-mini">🖥️ Abrir Mesa de Tratamento</a>
-        <div class="conexao-msg" id="conexaoMsg">Cole o webhook do Bitrix24 (leitura de CRM) e clique em Extrair. Ele fica salvo só neste navegador e a extração se repete sozinha 1x por dia ao abrir a página. O webhook é compartilhado com a Mesa de Tratamento (cole uma vez, funciona nas duas).</div>
-      </div>
-    </section>
+      </section>
 
-    <section class="card card-colapsavel" id="cardTarefas">
-      <div class="card-head">
-        <h3 class="colapsavel-toggle" data-alvo="tarefasBox">📋 Tarefas pendentes <span class="colapsavel-seta">▸</span></h3>
-        <span class="live-badge" id="notifBadge"><span class="dot"></span><span>lembretes desligados</span></span>
-      </div>
-      <div id="tarefasBox" class="colapsavel-corpo"><p class="nota">Extraia os dados pra ver as tarefas em aberto do João.</p></div>
-    </section>
+      <section class="card card-colapsavel" id="cardTarefas">
+        <div class="card-head">
+          <h3 class="colapsavel-toggle" data-alvo="tarefasBox">📋 Tarefas pendentes <span class="colapsavel-seta">▸</span></h3>
+          <span class="live-badge" id="notifBadge"><span class="dot"></span><span>lembretes desligados</span></span>
+        </div>
+        <div id="tarefasBox" class="colapsavel-corpo"><p class="nota">Extraia os dados pra ver as tarefas em aberto do João.</p></div>
+      </section>
 
-    <section class="card card-colapsavel" id="cardSemTrabalho" style="display:none;">
-      <div class="card-head">
-        <h3 class="colapsavel-toggle" data-alvo="semTrabalhoBox">⚠️ Leads sem trabalho no mês <span class="colapsavel-seta">▸</span></h3>
-      </div>
-      <div id="semTrabalhoBox" class="colapsavel-corpo"></div>
-    </section>
-
-    <section class="card card-colapsavel" id="cardClientes" style="display:none;">
-      <div class="card-head">
-        <h3 class="colapsavel-toggle" data-alvo="clientesBox">👥 Clientes do mês <span class="colapsavel-seta">▸</span></h3>
-        <button type="button" class="btn-mini" id="btnAtualizarClientes" style="padding:5px 10px;font-size:11px;">🔄 atualizar números</button>
-      </div>
-      <div id="clientesBox" class="colapsavel-corpo"></div>
-    </section>
+      <section class="card card-colapsavel" id="cardSemTrabalho" style="display:none;">
+        <div class="card-head">
+          <h3 class="colapsavel-toggle" data-alvo="semTrabalhoBox">⚠️ Leads sem trabalho no mês <span class="colapsavel-seta">▸</span></h3>
+        </div>
+        <div id="semTrabalhoBox" class="colapsavel-corpo"></div>
+      </section>
+    </div>
 
     <div id="diariaConteudo"></div>
   </div>
@@ -1451,10 +1445,18 @@
   // genérico (quem está por trás de cada número) pro modal funcionar
   // igual ao das abas Julho/Agosto.
   // -------------------------------------------------------------------
-  function computarPainelAoVivo({ leads, atividades, deals, stagehistory, ano, mesIdx }){
+  // `leadsNomeacao` = leads criados ANTES do mês mas com atividade dentro dele
+  // (cadência de um lead mais antigo) — servem só pra resolver nome/origem no
+  // calendário do dia (leadsPorIdCompleto, abaixo). NÃO entram em leadsPorId
+  // (porStatus/funil/SLA/comContato/semContato), que continua contando só
+  // quem foi criado no mês, mesmo critério de sempre — misturar ali inflaria
+  // "leads novos"/SLA com gente que nem é nova no mês.
+  function computarPainelAoVivo({ leads, atividades, deals, stagehistory, ano, mesIdx, leadsNomeacao = [] }){
     const porStatus = {}; Object.keys(NOME_STATUS).forEach(k => porStatus[k] = 0);
     const leadsPorId = {};
     leads.forEach(l => { porStatus[l.STATUS_ID] = (porStatus[l.STATUS_ID] || 0) + 1; leadsPorId[l.ID] = l; });
+    const leadsPorIdCompleto = { ...leadsPorId };
+    leadsNomeacao.forEach(l => { if (!leadsPorIdCompleto[l.ID]) leadsPorIdCompleto[l.ID] = l; });
 
     const atividadesPorLead = {};
     atividades.forEach(a => { if (a.OWNER_TYPE_ID === '1') (atividadesPorLead[a.OWNER_ID] ||= []).push(a); });
@@ -1517,7 +1519,7 @@
       diasMap[iso].total++;
       const c = canalDaAtividade(a.SUBJECT);
       diasMap[iso].canais[c] = (diasMap[iso].canais[c] || 0) + 1;
-      const lead = leadsPorId[a.OWNER_ID];
+      const lead = leadsPorIdCompleto[a.OWNER_ID];
       const registro = (clientesPorDia[iso] ||= {});
       const entry = (registro[String(a.OWNER_ID)] ||= {
         nome: nomeDoLead(lead),
@@ -1779,8 +1781,18 @@
       const leadsDoMes = leads.filter(l => l.DATE_CREATE && l.DATE_CREATE.slice(0, 10) >= inicio && l.DATE_CREATE.slice(0, 10) <= fim);
       const atividadesDoMes = atividades.filter(a => a.LAST_UPDATED && a.LAST_UPDATED.slice(0, 10) >= inicio && a.LAST_UPDATED.slice(0, 10) <= fim);
       const dealsDoMes = deals.filter(d => d.DATE_CREATE && d.DATE_CREATE.slice(0, 10) >= inicio && d.DATE_CREATE.slice(0, 10) <= fim);
+      // Leads mais antigos (criados antes do mês) mas ainda trabalhados agora —
+      // sem isso, o calendário do dia mostrava "Lead" genérico e origem em
+      // branco pra qualquer atividade fora do lote de leads novos do mês.
+      const idsLeadDoMes = new Set(leadsDoMes.map(l => String(l.ID)));
+      const idsLeadFaltando = [...new Set(
+        atividadesDoMes.filter(a => a.OWNER_TYPE_ID === '1').map(a => String(a.OWNER_ID))
+      )].filter(id => !idsLeadDoMes.has(id));
+      const leadsNomeacao = idsLeadFaltando.length
+        ? await bxListarTudo(webhook, 'crm.lead.list', { '@ID': idsLeadFaltando }, ['ID', 'STATUS_ID', 'DATE_CREATE', 'TITLE', 'NAME', 'LAST_NAME', 'COMPANY_TITLE', 'SOURCE_ID'])
+        : [];
       const stagehistory = await buscarStageHistoryLeads(webhook, leadsDoMes.map(l => l.ID));
-      const painel = computarPainelAoVivo({ leads: leadsDoMes, atividades: atividadesDoMes, deals: dealsDoMes, stagehistory, ano, mesIdx });
+      const painel = computarPainelAoVivo({ leads: leadsDoMes, atividades: atividadesDoMes, deals: dealsDoMes, stagehistory, ano, mesIdx, leadsNomeacao });
       const agora = new Date().toISOString();
       salvarCacheAoVivo(chave, painel, agora);
       renderizarDiaria(painel, chave);

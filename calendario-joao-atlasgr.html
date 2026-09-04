@@ -174,6 +174,8 @@
   .colapsavel-corpo{ display:none; margin-top:14px; }
   .card-colapsavel.aberto .colapsavel-corpo{ display:block; }
   .diaria-cards-linha{ display:grid; grid-template-columns:repeat(auto-fit,minmax(300px,1fr)); gap:16px; align-items:start; }
+  .painel-secoes-grid{ display:grid; grid-template-columns:repeat(auto-fit,minmax(420px,1fr)); gap:16px; align-items:start; }
+  .painel-secoes-grid > section{ margin:0; }
 
   /* chips de resumo das tarefas (atrasadas / hoje / futuras) */
   .tarefas-chips{ display:flex; flex-wrap:wrap; gap:8px; margin-bottom:12px; }
@@ -371,7 +373,7 @@
 <div class="page">
   <header>
     <div class="eyebrow">Comercial &amp; Receita · Bitrix24 (dados ao vivo) · BDR ID 392</div>
-    <h1>João Reis — Diagnóstico completo, julho e agosto de 2026</h1>
+    <h1>João Reis</h1>
   </header>
 
   <div class="tab-cards" id="visaoCards"></div>
@@ -770,6 +772,33 @@
     <p class="nota">Contato efetivo = chegou a agendar/realizar reunião ou converter. Contato não efetivo = teve pelo menos um contato mas ficou em cadência ou desqualificou sem reunião. Não contatado = zero atividade concluída vinculada.</p>`;
   }
 
+  // card-destaque de uma origem específica (ex: feira/evento) — puxa os mesmos
+  // números já calculados em origem/origemPorEtapa/contatoPorOrigem, só que
+  // isolados numa única origem em vez da tabela cruzada com todas.
+  function cardOrigemDestaque(chaveOrigem, rotulo, titulo, origem, origemPorEtapa, contatoPorOrigem){
+    if (!origem || !origem[chaveOrigem]) return '';
+    const total = origem[chaveOrigem];
+    const totalGeral = Object.values(origem).reduce((a, b) => a + b, 0);
+    const pctTotal = totalGeral ? Math.round(total / totalGeral * 1000) / 10 : 0;
+    const convertido = (origemPorEtapa?.['CONVERTED']?.[chaveOrigem]) || 0;
+    const taxa = total ? Math.round(convertido / total * 1000) / 10 : 0;
+    const c = (contatoPorOrigem && contatoPorOrigem[chaveOrigem]) || { naoContatado: 0, efetivo: 0, naoEfetivo: 0 };
+    return `
+    <section class="card">
+      <div class="card-head"><h3>🎪 ${rotulo} — ${titulo}</h3><div class="hint">Origem "${chaveOrigem}" isolada — mesmos números de origem por etapa, só que só dela</div></div>
+      <div class="kpis">
+        ${kpiEstatico('userPlus', total, 'n', 'Leads dessa origem')}
+        ${kpiEstatico('trendUp', pctTotal, 'dec1', '% do total de leads do mês')}
+        ${kpiEstatico('checkCircle', taxa, 'dec1', '% taxa de conversão')}
+        ${kpiEstatico('activity', c.efetivo, 'n', 'Contatos efetivos')}
+        ${kpiEstatico('xCircle', c.naoEfetivo, 'n', 'Contato sem efeito')}
+        ${kpiEstatico('alertTriangle', c.naoContatado, 'n', 'Sem contato ainda')}
+        ${kpiEstatico('calendar', (origemPorEtapa?.['UC_B5Q2RS']?.[chaveOrigem]) || 0, 'n', 'Reunião Agendada')}
+        ${kpiEstatico('calendarCheck', (origemPorEtapa?.['UC_68OHNT']?.[chaveOrigem]) || 0, 'n', 'Reunião Realizada')}
+      </div>
+    </section>`;
+  }
+
   function painelMes(chave, titulo, funil, dias, canal, sla, dealsResumo, dealsDetalhe, met, diasUteis, origem, origemPorEtapa, contatoPorOrigem){
     const somaAtiv = dias.reduce((a,d)=>a+d.total,0);
     return `
@@ -784,6 +813,7 @@
       ${kpiEstatico('trendUp', somaAtiv/diasUteis, 'dec1', `Média / dia útil (${diasUteis}d)`)}
     </div>
 
+    <div class="painel-secoes-grid">
     <section class="card">
       <div class="card-head"><h3>Funil de Leads — ${titulo}</h3><div class="hint">crm.stagehistory.list, leads únicos por etapa</div></div>
       ${barraFunil(funil, MAPA_FUNIL)}
@@ -829,10 +859,13 @@
       <p class="nota">Cada célula é quantos leads únicos daquela origem já passaram por aquela etapa (crm.stagehistory.list) — não é exclusivo, um lead pode contar em várias etapas do próprio caminho.</p>
     </section>` : ''}
 
+    ${cardOrigemDestaque('VIBRA_FORUM_2026', 'Feira e Eventos (VIBRA Fórum)', titulo, origem, origemPorEtapa, contatoPorOrigem)}
+
     <section class="card">
       <div class="card-head"><h3>Negócios rastreados a partir de Leads convertidos — ${titulo}</h3><div class="hint">Lead convertido no mês → Deal correspondente (crm.deal.list por LEAD_ID)</div></div>
       ${dealsGrid(dealsDetalhe)}
     </section>
+    </div>
 
     <section class="card">
       <div class="card-head"><h3>Atividades dia a dia — ${titulo}</h3><div class="hint">Clique num dia do calendário pra ver quem foi atendido</div></div>

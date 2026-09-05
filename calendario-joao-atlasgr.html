@@ -41,6 +41,10 @@
 
   header{ display:flex; flex-direction:column; gap:4px; padding:4px 0; }
   .eyebrow{ font-size:11.5px; letter-spacing:.08em; text-transform:uppercase; color:var(--brand); font-weight:700; }
+  .seletor-bdr-wrap{ text-transform:none; letter-spacing:normal; display:inline-flex; align-items:center; gap:5px; }
+  .seletor-bdr{ font-family:inherit; font-size:12px; font-weight:700; color:var(--ink); background:var(--surface); border:1px solid var(--line); border-radius:8px; padding:3px 6px; cursor:pointer; max-width:220px; }
+  .btn-bdr-reload{ font-family:inherit; font-size:12px; border:1px solid var(--line); background:var(--surface); border-radius:8px; padding:2px 6px; cursor:pointer; line-height:1; }
+  .btn-bdr-reload:disabled{ opacity:.5; cursor:progress; }
   h1{ font-family:"Montserrat",sans-serif; font-weight:800; font-size:clamp(22px,3.4vw,30px); line-height:1.15; margin:2px 0 0; letter-spacing:-.01em; }
   .sub{ color:var(--ink-2); font-size:13.5px; margin-top:2px; }
 
@@ -372,8 +376,8 @@
 
 <div class="page">
   <header>
-    <div class="eyebrow">Comercial &amp; Receita · Bitrix24 (dados ao vivo) · BDR ID 392</div>
-    <h1>João Reis</h1>
+    <div class="eyebrow">Comercial &amp; Receita · Bitrix24 (dados ao vivo) · <span class="seletor-bdr-wrap">BDR: <select id="seletorBdr" class="seletor-bdr"><option value="392">João Reis</option></select><button type="button" id="btnCarregarBdrs" class="btn-bdr-reload" title="Carregar lista de SDRs do Bitrix24">🔄</button></span></div>
+    <h1 id="tituloSdr">João Reis</h1>
   </header>
 
   <div class="tab-cards" id="visaoCards"></div>
@@ -807,9 +811,9 @@
     const doOrigem = leadsRaw.filter((l) => l.origem === chaveOrigem);
     if (!doOrigem.length) return cabecalhoDrill(chaveOrigem, 0) + '<p class="nota">Sem detalhe por cliente disponível pra este mês (só meses extraídos ao vivo têm esse nível de detalhe).</p>';
     const grupos = [
-      { chave: 'efetivo', titulo: 'Contato efetivo — sem nota de falha registrada', itens: doOrigem.filter((l) => l.contatoEfetivo === true) },
-      { chave: 'naoEfetivo', titulo: 'Teve atividade, mas com nota de falha (ex: "não consegui contato")', itens: doOrigem.filter((l) => l.contatoEfetivo === false) },
-      { chave: 'naoContatado', titulo: 'Nenhum contato ainda', itens: doOrigem.filter((l) => l.contatoEfetivo == null) },
+      { chave: 'efetivo', titulo: '✅ Contato efetivo — sem nota de falha registrada', itens: doOrigem.filter((l) => l.contatoEfetivo === true) },
+      { chave: 'naoEfetivo', titulo: '⚠️ Teve atividade, mas com nota de falha (ex: "não consegui contato")', itens: doOrigem.filter((l) => l.contatoEfetivo === false) },
+      { chave: 'naoContatado', titulo: '⚪ Nenhum contato ainda', itens: doOrigem.filter((l) => l.contatoEfetivo == null) },
     ];
     const corpo = grupos.map((g) => {
       if (!g.itens.length) return '';
@@ -838,12 +842,12 @@
 
     <div class="painel-secoes-grid">
     <section class="card">
-      <div class="card-head"><h3>Funil de Leads — ${titulo}</h3><div class="hint">crm.stagehistory.list, leads únicos por etapa</div></div>
+      <div class="card-head"><h3>🪜 Funil de Leads — ${titulo}</h3><div class="hint">crm.stagehistory.list, leads únicos por etapa</div></div>
       ${barraFunil(funil, MAPA_FUNIL)}
     </section>
 
     <section class="card">
-      <div class="card-head"><h3>Indicadores de SDR — ${titulo}</h3><div class="hint">Clique em qualquer card pra ver quem entra na conta</div></div>
+      <div class="card-head"><h3>📊 Indicadores de SDR — ${titulo}</h3><div class="hint">Clique em qualquer card pra ver quem entra na conta</div></div>
       <div class="stat-grid">
         ${statCard('users', 'Taxa de contato (trabalhados / novos)', met.taxaContato+'%', chave, 'TRABALHADOS')}
         ${statCard('calendar', 'Taxa de agendamento (Reunião Agendada / trabalhados)', met.taxaAgendamento+'%', chave, 'UC_B5Q2RS')}
@@ -863,21 +867,21 @@
     </section>
 
     <section class="card">
-      <div class="card-head"><h3>Canal das atividades</h3></div>
+      <div class="card-head"><h3>📞 Canal das atividades</h3></div>
       ${canalVisual(canal)}
       <p class="nota">"Contatar cliente (genérico)" é o rótulo padrão da ferramenta de cadência — o canal real só aparece no texto em ~5% dos casos.</p>
     </section>
 
     ${origem && Object.keys(origem).length ? `
     <section class="card">
-      <div class="card-head"><h3>Origem dos Leads — ${titulo}</h3><div class="hint">crm.lead.list, SOURCE_ID de quem entrou no mês</div></div>
+      <div class="card-head"><h3>🌐 Origem dos Leads — ${titulo}</h3><div class="hint">crm.lead.list, SOURCE_ID de quem entrou no mês</div></div>
       ${canalVisual(origem)}
       <p class="nota">Critério: Leads com ASSIGNED_BY_ID = João e DATE_CREATE no mês — pode não bater 100% com "Leads novos" do card principal, que usa outro critério de contagem.</p>
     </section>` : ''}
 
     ${origemPorEtapa ? `
     <section class="card">
-      <div class="card-head"><h3>Origem por etapa do funil — ${titulo}</h3><div class="hint">De qual origem vem cada etapa, e taxa de conversão por origem</div></div>
+      <div class="card-head"><h3>🔀 Origem por etapa do funil — ${titulo}</h3><div class="hint">De qual origem vem cada etapa, e taxa de conversão por origem</div></div>
       ${tabelaOrigemPorEtapa(origemPorEtapa, origem || {}, contatoPorOrigem || {})}
       <p class="nota">Cada célula é quantos leads únicos daquela origem já passaram por aquela etapa (crm.stagehistory.list) — não é exclusivo, um lead pode contar em várias etapas do próprio caminho.</p>
     </section>` : ''}
@@ -885,18 +889,18 @@
     ${cardOrigemDestaque(chave, 'VIBRA_FORUM_2026', 'Feira e Eventos (VIBRA Fórum)', titulo, origem, origemPorEtapa, contatoPorOrigem)}
 
     <section class="card">
-      <div class="card-head"><h3>Negócios rastreados a partir de Leads convertidos — ${titulo}</h3><div class="hint">Lead convertido no mês → Deal correspondente (crm.deal.list por LEAD_ID)</div></div>
+      <div class="card-head"><h3>💼 Negócios rastreados a partir de Leads convertidos — ${titulo}</h3><div class="hint">Lead convertido no mês → Deal correspondente (crm.deal.list por LEAD_ID)</div></div>
       ${dealsGrid(dealsDetalhe)}
     </section>
     </div>
 
     <section class="card">
-      <div class="card-head"><h3>Atividades dia a dia — ${titulo}</h3><div class="hint">Clique num dia do calendário pra ver quem foi atendido</div></div>
+      <div class="card-head"><h3>🗓️ Atividades dia a dia — ${titulo}</h3><div class="hint">Clique num dia do calendário pra ver quem foi atendido</div></div>
       ${heatmapDias(dias, chave)}
     </section>
 
     <section class="card">
-      <div class="card-head"><h3>Atividades por dia — ligações, WhatsApp e e-mail</h3><div class="hint">Mesmo dado do calendário acima, aberto por canal, dia a dia</div></div>
+      <div class="card-head"><h3>📆 Atividades por dia — ligações, WhatsApp e e-mail</h3><div class="hint">Mesmo dado do calendário acima, aberto por canal, dia a dia</div></div>
       ${tabelaDiasCanais(dias)}
     </section>
     `;
@@ -939,7 +943,7 @@
     const removidos = [...(D.dealsJulRemovidos||[]), ...(D.dealsAgoRemovidos||[])];
     return `
     <section class="card">
-      <div class="card-head"><h3>Julho vs. Agosto — visão geral</h3><div class="hint">Barra maior = valor mais alto entre os dois meses</div></div>
+      <div class="card-head"><h3>⚖️ Julho vs. Agosto — visão geral</h3><div class="hint">Barra maior = valor mais alto entre os dois meses</div></div>
       <div class="cbar-legend"><span><i style="background:var(--brand-soft)"></i> Julho</span><span><i style="background:var(--brand)"></i> Agosto</span></div>
       ${barraComparativa('Leads novos', mj.leadsNovos, ma.leadsNovos, 'n')}
       ${barraComparativa('Leads trabalhados', mj.leadsTrabalhados, ma.leadsTrabalhados, 'n')}
@@ -951,7 +955,7 @@
     </section>
 
     <section class="card">
-      <div class="card-head"><h3>Todos os indicadores, lado a lado</h3><div class="hint">Δ = variação percentual mês a mês</div></div>
+      <div class="card-head"><h3>📈 Todos os indicadores, lado a lado</h3><div class="hint">Δ = variação percentual mês a mês</div></div>
       <div class="tabela-scroll" style="max-height:none;">
       <table class="compare-table">
         <thead><tr><th>Indicador</th><th class="num">Julho</th><th class="num">Agosto</th><th class="num">Δ</th></tr></thead>
@@ -1046,7 +1050,7 @@
     </div>
 
     <section class="card">
-      <div class="card-head"><h3>Gargalos do estoque "Em Cadência"</h3><div class="hint">${r.total} Leads do João parados nessa etapa hoje</div></div>
+      <div class="card-head"><h3>🚧 Gargalos do estoque "Em Cadência"</h3><div class="hint">${r.total} Leads do João parados nessa etapa hoje</div></div>
       <div class="achados">
         <div class="achado gap"><div class="marker atencao">${svgIcone('alertTriangle')}</div><div class="txt"><b>${r.parado30d + r.parado15d} de ${r.total} Leads (${Math.round((r.parado30d + r.parado15d) / r.total * 1000) / 10}%) estão há 15 dias ou mais sem nenhum toque</b> — ${r.parado30d} deles já passam de 30 dias parados. É o principal gargalo do estoque: mais da metade do que hoje conta como "trabalhando" está, na prática, esquecido.</div></div>
         <div class="achado gap"><div class="marker atencao">${svgIcone('alertTriangle')}</div><div class="txt"><b>${r.semAtividade} Leads nunca receberam nenhuma atividade</b> desde que entraram no funil, alguns criados há mais de um mês — entraram e ficaram parados sem nenhum primeiro toque.</div></div>
@@ -1056,7 +1060,7 @@
     </section>
 
     <section class="card">
-      <div class="card-head"><h3>Todos os ${r.total} Leads — um a um</h3><div class="hint">Ordenado por dias parado (mais urgente primeiro) · clique numa linha pra ver a linha do tempo de atividades</div></div>
+      <div class="card-head"><h3>📑 Todos os ${r.total} Leads — um a um</h3><div class="hint">Ordenado por dias parado (mais urgente primeiro) · clique numa linha pra ver a linha do tempo de atividades</div></div>
       <div class="tabela-scroll" style="max-height:640px;">
         <table>
           <thead><tr><th>Lead</th><th class="num">Dias parado</th><th class="num">Atividades</th><th class="num">Gap médio</th><th>Canais</th><th>Reunião?</th><th>Situação</th></tr></thead>
@@ -1087,7 +1091,7 @@
   function painelDiagnostico(){
     return `
     <section class="card">
-      <div class="card-head"><h3>Gargalos identificados</h3></div>
+      <div class="card-head"><h3>🔍 Gargalos identificados</h3></div>
       <div class="achados">
         <div class="achado gap"><div class="marker atencao">${svgIcone('alertTriangle')}</div><div class="txt"><b>Taxa de agendamento caiu de 25% pra 8,4%</b> enquanto leads trabalhados quase triplicou (64→179). Se a taxa de julho tivesse se mantido, os 179 leads trabalhados em agosto teriam gerado ~45 reuniões agendadas — só 15 aconteceram, um déficit de ~30 reuniões pela queda de eficiência, não por falta de leads.
         <span class="meta">Conta: 25% × 179 leads trabalhados = ~45 reuniões esperadas na taxa de julho. Realizado: 15. Déficit: ~30.</span></div></div>
@@ -1104,7 +1108,7 @@
     </section>
 
     <section class="card">
-      <div class="card-head"><h3>Pontos positivos</h3></div>
+      <div class="card-head"><h3>✅ Pontos positivos</h3></div>
       <div class="achados">
         <div class="achado win"><div class="marker brilho">${svgIcone('checkCircle')}</div><div class="txt"><b>Receita ganha (negócios que continuam do João) subiu 101,8%</b> — de R$ 180 pra R$ 363,20 — com a taxa de vitória dos negócios subindo de 50% pra 71,4% (5 ganhos em 7 fechados, contra 1 em 2 no mês anterior).</div></div>
         <div class="achado win"><div class="marker brilho">${svgIcone('checkCircle')}</div><div class="txt"><b>Volume de atividade quase triplicou</b> — 9,3 pra 25,2 atividades por dia útil — com zero dias úteis sem nenhum registro em agosto.</div></div>
@@ -1114,7 +1118,7 @@
     </section>
 
     <section class="card">
-      <div class="card-head"><h3>Como o João conduz a reunião — lido direto na transcrição</h3><div class="hint">Baseado nas 2 chamadas de venda completas encontradas (AKB Transportes 04/08 e Lei de Cargas 05/08)</div></div>
+      <div class="card-head"><h3>🎙️ Como o João conduz a reunião — lido direto na transcrição</h3><div class="hint">Baseado nas 2 chamadas de venda completas encontradas (AKB Transportes 04/08 e Lei de Cargas 05/08)</div></div>
       <div class="achados">
         <div class="achado win"><div class="marker brilho">${svgIcone('checkCircle')}</div><div class="txt"><b>Constrói rapport de verdade na abertura</b> — cumprimenta pelo nome, confere áudio, humor leve antes de entrar no assunto. Cliente fica à vontade rápido.</div></div>
         <div class="achado win"><div class="marker brilho">${svgIcone('checkCircle')}</div><div class="txt"><b>Faz o dever de casa antes da call</b> — na AKB, abriu já dizendo que pesquisou a empresa da cliente antes de perguntar o que ela precisava.</div></div>
@@ -1128,7 +1132,7 @@
     </section>
 
     <section class="card">
-      <div class="card-head"><h3>Boas práticas — o que o João pode ajustar pra melhorar a leitura do próprio funil</h3><div class="hint">Higiene de CRM, não esforço extra de prospecção</div></div>
+      <div class="card-head"><h3>💡 Boas práticas — o que o João pode ajustar pra melhorar a leitura do próprio funil</h3><div class="hint">Higiene de CRM, não esforço extra de prospecção</div></div>
       <div class="checklist">
         ${practica('<b>Trocar "Contatar cliente" pelo canal real</b> em cada atividade lançada — hoje 88% ficam genéricas e escondem o que está funcionando de verdade.',
           'Antes de salvar a atividade, editar o assunto pra começar com o canal usado (ex: "WhatsApp — retorno sobre proposta") em vez de deixar o texto padrão da ferramenta de cadência.',
@@ -1154,7 +1158,7 @@
     </section>
 
     <section class="card">
-      <div class="card-head"><h3>Plano de ação — corrigir os gargalos</h3></div>
+      <div class="card-head"><h3>🎯 Plano de ação — corrigir os gargalos</h3></div>
       <div class="plano">
         ${passo('<b>Padronizar o registro de canal.</b> Trocar "Contatar cliente" genérico por um rótulo real em cada atividade.',
           'Definir com o time uma lista curta de rótulos padrão (Ligação, WhatsApp, E-mail, LinkedIn) e pedir pra sempre começar o assunto da atividade com um deles.',
@@ -1180,7 +1184,7 @@
     </section>
 
     <section class="card">
-      <div class="card-head"><h3>Plano de escala — de ~25 pra 60–100 atividades/dia</h3><div class="hint">Hoje: média 25,2/dia útil em agosto, pico de 48 num único dia</div></div>
+      <div class="card-head"><h3>🚀 Plano de escala — de ~25 pra 60–100 atividades/dia</h3><div class="hint">Hoje: média 25,2/dia útil em agosto, pico de 48 num único dia</div></div>
       <div class="plano">
         ${passo('<b>Aumentar a densidade de toques por lead, não só a base.</b> Hoje são ~3 atividades por Lead trabalhado.',
           'Montar uma cadência fixa de 6-8 toques por lead, intercalando canal (ex.: dia 1 ligação + WhatsApp, dia 3 e-mail, dia 5 ligação, dia 7 LinkedIn, dia 10 ligação final) em vez de 1-2 tentativas soltas.',
@@ -1354,7 +1358,9 @@
   // pros meses que já têm dado (fixo ou extraído ao vivo) e mostra placeholder
   // pros demais.
   // =========================================================================
-  const JOAO_USER_ID = 392;
+  let JOAO_USER_ID = 392;
+  let JOAO_USER_NOME = 'João Reis';
+  const BDR_KEY = 'atlasgr_bdr_selecionado'; // guarda { id, nome } do BDR escolhido no seletor — troca o dono dos dados extraídos ao vivo
   const WEBHOOK_KEY = 'atlas-extrator-bitrix-webhook'; // mesma chave da Mesa de Tratamento (Jo-o-Reis) — cola uma vez, funciona nas duas
   // mesma ofuscação XOR leve do resto da plataforma (js/bitrix-api.js) — não é
   // segurança real, só evita texto puro trivial no DevTools; precisa bater com
@@ -1437,6 +1443,20 @@
     const json = await resp.json();
     if (json.error) throw new Error(json.error_description || json.error);
     return json.result;
+  }
+  // lista de usuários ativos do Bitrix24 — alimenta o seletor de BDR
+  async function bxListarUsuarios(webhook){
+    let start = 0, todos = [], guarda = 0;
+    while (guarda++ < 50) {
+      const qs = bxQueryString({ FILTER: { ACTIVE: 'Y' }, ADMIN_MODE: 'Y', start });
+      const resp = await fetch(webhook.replace(/\/?$/, '/') + 'user.get.json?' + qs);
+      const json = await resp.json();
+      if (json.error) throw new Error(json.error_description || json.error);
+      todos = todos.concat(json.result || []);
+      if (json.next == null) break;
+      start = json.next;
+    }
+    return todos;
   }
   // crm.stagehistory.list tem formato de resposta diferente (result.items, não
   // result direto) e exige entityTypeId fora do filter — por isso não usa
@@ -1737,7 +1757,8 @@
   function salvarCacheAoVivo(chave, painel, quando){
     let cache = {};
     try { cache = JSON.parse(localStorage.getItem(AOVIVO_KEY) || '{}'); } catch (e) {}
-    cache[chave] = { painel: painel.painel, drillExtra: painel.drillExtra, extraidoEm: quando };
+    cache[JOAO_USER_ID] = cache[JOAO_USER_ID] || {};
+    cache[JOAO_USER_ID][chave] = { painel: painel.painel, drillExtra: painel.drillExtra, extraidoEm: quando };
     try { localStorage.setItem(AOVIVO_KEY, JSON.stringify(cache)); } catch (e) {}
   }
   function carregarCacheAoVivo(){
@@ -1835,8 +1856,8 @@
     const listaAtrasadas = atrasadas.slice(0, 25).map(linha).join('');
     const listaHoje = hoje.map(linha).join('');
     box.innerHTML = chips
-      + (atrasadas.length ? `<div class="label-mini">Atrasadas</div><div class="task-list">${listaAtrasadas}</div>${atrasadas.length > 25 ? `<p class="nota">+ ${atrasadas.length - 25} outra(s) atrasada(s).</p>` : ''}` : '')
-      + (hoje.length ? `<div class="label-mini" style="margin-top:10px;">Hoje</div><div class="task-list">${listaHoje}</div>` : '')
+      + (atrasadas.length ? `<div class="label-mini">🔴 Atrasadas</div><div class="task-list">${listaAtrasadas}</div>${atrasadas.length > 25 ? `<p class="nota">+ ${atrasadas.length - 25} outra(s) atrasada(s).</p>` : ''}` : '')
+      + (hoje.length ? `<div class="label-mini" style="margin-top:10px;">🟡 Hoje</div><div class="task-list">${listaHoje}</div>` : '')
       + (!atrasadas.length && !hoje.length ? '<p class="nota">Nada atrasado nem pra hoje — só tarefas futuras.</p>' : '');
   }
   function atualizarContadorTarefas(nAtrasadas){
@@ -1888,6 +1909,59 @@
   });
   document.getElementById('btnExtrairDiario').addEventListener('click', extrairDiaria);
 
+  // -------------------------------------------------------------------
+  // Seletor de BDR: troca de quem são os dados extraídos ao vivo. A lista
+  // de nomes vem do próprio Bitrix24 (user.get); a escolha fica salva no
+  // navegador e o cache ao vivo é isolado por BDR pra não misturar dado de
+  // pessoas diferentes.
+  // -------------------------------------------------------------------
+  function aplicarBdrSelecionado(id, nome, salvar){
+    JOAO_USER_ID = Number(id);
+    if (nome) JOAO_USER_NOME = nome;
+    const h1 = document.getElementById('tituloSdr');
+    if (h1) h1.textContent = JOAO_USER_NOME;
+    if (salvar !== false) {
+      try { localStorage.setItem(BDR_KEY, JSON.stringify({ id: JOAO_USER_ID, nome: JOAO_USER_NOME })); } catch (e) {}
+    }
+  }
+  function preencherSeletorBdr(usuarios){
+    const sel = document.getElementById('seletorBdr');
+    const atual = JOAO_USER_ID;
+    sel.innerHTML = '';
+    usuarios
+      .map(u => ({ id: Number(u.ID), nome: [u.NAME, u.LAST_NAME].filter(Boolean).join(' ') || `Usuário ${u.ID}` }))
+      .sort((a, b) => a.nome.localeCompare(b.nome, 'pt-BR'))
+      .forEach(u => {
+        const opt = document.createElement('option');
+        opt.value = u.id; opt.textContent = u.nome;
+        if (u.id === atual) opt.selected = true;
+        sel.appendChild(opt);
+      });
+    if (!sel.value) return;
+    const nomeSelecionado = sel.selectedOptions[0]?.textContent;
+    if (nomeSelecionado && Number(sel.value) === atual) aplicarBdrSelecionado(sel.value, nomeSelecionado);
+  }
+  document.getElementById('seletorBdr').addEventListener('change', function (){
+    const nome = this.selectedOptions[0]?.textContent;
+    aplicarBdrSelecionado(this.value, nome);
+    setConexaoMsg(`Trocado pra ${nome} — extraindo os dados dele(a)…`);
+    extrairDiaria();
+  });
+  document.getElementById('btnCarregarBdrs').addEventListener('click', async function (){
+    const webhook = campoWebhook.value.trim();
+    if (!validarWebhookJoao(webhook)) { setConexaoMsg('Cole um webhook válido antes de carregar a lista de SDRs.', true); return; }
+    this.disabled = true;
+    try {
+      const usuarios = await bxListarUsuarios(webhook);
+      preencherSeletorBdr(usuarios);
+      setConexaoMsg(`${usuarios.length} usuário(s) carregado(s) do Bitrix24 — escolha o BDR na lista.`, false, true);
+    } catch (e) {
+      setConexaoMsg('Falha ao carregar SDRs: ' + e.message, true);
+    } finally {
+      this.disabled = false;
+    }
+  });
+
   // seções colapsáveis (Tarefas / Leads sem trabalho / Clientes) — fecham/abrem no clique do título
   document.body.addEventListener('click', (ev) => {
     const toggle = ev.target.closest('.colapsavel-toggle');
@@ -1912,12 +1986,24 @@
   });
 
   (function iniciarDiaria(){
+    const bdrSalvo = (() => { try { return JSON.parse(localStorage.getItem(BDR_KEY) || 'null'); } catch (e) { return null; } })();
+    if (bdrSalvo && bdrSalvo.id) {
+      aplicarBdrSelecionado(bdrSalvo.id, bdrSalvo.nome, false);
+      const sel = document.getElementById('seletorBdr');
+      if (![...sel.options].some(o => Number(o.value) === JOAO_USER_ID)) {
+        const opt = document.createElement('option');
+        opt.value = JOAO_USER_ID; opt.textContent = JOAO_USER_NOME;
+        sel.appendChild(opt);
+      }
+      sel.value = JOAO_USER_ID;
+    }
+
     const salvo = (() => { try { return desofuscarWebhook(localStorage.getItem(WEBHOOK_KEY) || ''); } catch (e) { return ''; } })();
     if (salvo) campoWebhook.value = salvo;
 
     const cache = carregarCacheAoVivo();
     const { chave } = chaveEHoje();
-    const cacheDoMes = cache[chave];
+    const cacheDoMes = (cache[JOAO_USER_ID] || {})[chave];
     if (cacheDoMes) {
       D.aoVivo[chave] = { ...(D.aoVivo[chave] || {}), ...cacheDoMes.drillExtra, dias: cacheDoMes.painel.dias };
       const p = cacheDoMes.painel;
@@ -1945,7 +2031,7 @@
   function construirGradeAnual(){
     const grid = document.getElementById('anualGrid');
     grid.innerHTML = '';
-    const cacheAoVivo = carregarCacheAoVivo();
+    const cacheAoVivo = carregarCacheAoVivo()[JOAO_USER_ID] || {};
     const { chave: chaveAtual } = chaveEHoje();
     for (let m = 0; m < 12; m++) {
       const chaveMes = `2026-${String(m + 1).padStart(2, '0')}`;

@@ -1,0 +1,193 @@
+<!doctype html><html lang="pt-BR"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Leads VIBRA RJ 2026 — João Reis · AtlasGR</title>
+<style>
+  :root {
+    --orange:   #FF5618;
+    --orange-2: #FF8008;
+    --orange-3: #FF6B10;
+    --gold:     #FFC500;
+    --dark:     #333333;
+    --white:    #FFFFFF;
+    --cream:    #FBF3EC;
+    --line:     #EAE1D8;
+    --muted:    #8A8078;
+    --maxw:     880px;
+    --good: #0ca30c; --warning: #fab219; --serious: #ec835a; --critical: #d03b3b;
+    --shadow-card: 0 18px 40px -22px rgba(51,51,51,.28);
+  }
+  * { box-sizing: border-box; }
+  body {
+    font-family: 'Montserrat','Segoe UI',Arial,sans-serif; font-size: 14px; color: var(--dark);
+    background: linear-gradient(180deg,#FAF9F7 0%,#F4F1EC 100%) fixed; margin: 0; padding: 0 0 48px;
+    -webkit-font-smoothing: antialiased;
+  }
+  .letterhead { background: var(--white); border-bottom: 3px solid var(--orange); }
+  .letterhead-inner { max-width: var(--maxw); margin: 0 auto; padding: 20px 24px; display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 14px; }
+  .brand { font-weight: 800; font-size: 18px; letter-spacing: -.02em; }
+  .brand span { color: var(--orange); }
+  .letterhead-ref { font-size: 12px; font-weight: 600; color: var(--muted); text-align: right; line-height: 1.6; }
+  .letterhead-ref strong { color: var(--dark); font-weight: 800; }
+
+  .wrap { max-width: var(--maxw); margin: 28px auto 0; padding: 0 24px; }
+
+  .hero { border-radius: 20px; background: linear-gradient(120deg, var(--orange) 0%, var(--orange-2) 60%, var(--gold) 130%); color: #fff; padding: 26px 28px; box-shadow: var(--shadow-card); margin-bottom: 24px; }
+  .hero .tag { font-size: 11px; font-weight: 800; letter-spacing: .08em; text-transform: uppercase; opacity: .85; }
+  .hero h1 { margin: 6px 0 4px; font-size: 22px; letter-spacing: -.01em; }
+  .hero p { margin: 0; font-size: 13px; opacity: .92; max-width: 60ch; }
+
+  .kpis { display: grid; grid-template-columns: repeat(4,1fr); gap: 14px; margin-bottom: 24px; }
+  .kpi { background: var(--white); border: 1px solid var(--line); border-radius: 16px; padding: 16px 16px; box-shadow: var(--shadow-card); }
+  .kpi-label { font-size: 10.5px; font-weight: 800; text-transform: uppercase; letter-spacing: .05em; color: var(--muted); }
+  .kpi-value { font-size: 26px; font-weight: 800; margin-top: 4px; letter-spacing: -.02em; }
+  .kpi.good .kpi-value { color: var(--good); }
+  .kpi.bad .kpi-value { color: var(--critical); }
+  .kpi.neutral .kpi-value { color: var(--orange); }
+
+  .card { background: var(--white); border: 1px solid var(--line); border-radius: 18px; box-shadow: var(--shadow-card); overflow: hidden; margin-bottom: 20px; }
+  .card-head { padding: 16px 20px; border-bottom: 1px solid var(--line); display: flex; align-items: center; justify-content: space-between; gap: 10px; }
+  .card-head h2 { margin: 0; font-size: 14px; font-weight: 800; text-transform: uppercase; letter-spacing: .03em; }
+  .card-head.good { border-left: 4px solid var(--good); }
+  .card-head.bad { border-left: 4px solid var(--critical); }
+  .count-pill { font-size: 12px; font-weight: 800; padding: 3px 10px; border-radius: 999px; background: var(--cream); color: var(--dark); }
+  .card-body { padding: 6px 0; }
+
+  .lead-row { display: flex; align-items: center; justify-content: space-between; gap: 12px; padding: 10px 20px; border-bottom: 1px dashed var(--line); font-size: 13px; }
+  .lead-row:last-child { border-bottom: none; }
+  .lead-name { font-weight: 600; }
+  .lead-meta { font-size: 11px; color: var(--muted); white-space: nowrap; }
+  .chip { font-size: 10.5px; font-weight: 800; padding: 2px 8px; border-radius: 999px; text-transform: uppercase; letter-spacing: .03em; }
+  .chip.cadencia { background: rgba(250,178,25,.15); color: #a06400; }
+  .chip.reuniao { background: rgba(12,163,12,.12); color: var(--good); }
+  .chip.junk { background: rgba(208,59,59,.12); color: var(--critical); }
+
+  .note { font-size: 12px; color: var(--muted); padding: 14px 20px; background: var(--cream); border-radius: 0 0 18px 18px; }
+  footer { max-width: var(--maxw); margin: 24px auto 0; padding: 0 24px; font-size: 11px; color: var(--muted); text-align: center; }
+</style>
+</head>
+<body>
+
+<div class="letterhead"><div class="letterhead-inner">
+  <div class="brand">Atlas<span>GR</span> · Mesa de Tratamento SDR</div>
+  <div class="letterhead-ref"><strong>João Reis</strong> · BDR Comercial<br>Bitrix24 · gerado em 04/09/2026</div>
+</div></div>
+
+<div class="wrap">
+
+  <div class="hero">
+    <div class="tag">Origem: Fórum Nacional de Transportes Vibra RJ 2026</div>
+    <h1>Contato com leads da campanha VIBRA</h1>
+    <p>Levantamento dos 81 leads gerados pelo evento Vibra, cruzando o cadastro no CRM com o histórico de atividades (ligação, WhatsApp, e-mail) do Bitrix24 para identificar quem já recebeu tentativa de contato concluída e quem ainda está 100% pendente.</p>
+  </div>
+
+  <div class="kpis">
+    <div class="kpi neutral"><div class="kpi-label">Total de leads</div><div class="kpi-value">81</div></div>
+    <div class="kpi good"><div class="kpi-label">Receberam contato</div><div class="kpi-value">32</div></div>
+    <div class="kpi bad"><div class="kpi-label">Sem contato</div><div class="kpi-value">49</div></div>
+    <div class="kpi neutral"><div class="kpi-label">Taxa de contato</div><div class="kpi-value">40%</div></div>
+  </div>
+
+  <div class="card">
+    <div class="card-head bad">
+      <h2>Sem contato — nenhuma atividade concluída</h2>
+      <span class="count-pill">49 leads</span>
+    </div>
+    <div class="card-body">
+      <div class="lead-row"><span class="lead-name">Coopertransp</span><span class="lead-meta"><span class="chip cadencia">Em Cadência</span> · 2 pend.</span></div>
+      <div class="lead-row"><span class="lead-name">Empresa de Transportes e Logística Paraná</span><span class="lead-meta"><span class="chip cadencia">Em Cadência</span> · 2 pend.</span></div>
+      <div class="lead-row"><span class="lead-name">FCB - Transporte Logística e Serviços Gerais</span><span class="lead-meta"><span class="chip cadencia">Em Cadência</span> · 2 pend.</span></div>
+      <div class="lead-row"><span class="lead-name">Flexsil Sistema Sul Brasileiro Tran</span><span class="lead-meta"><span class="chip cadencia">Em Cadência</span> · 2 pend.</span></div>
+      <div class="lead-row"><span class="lead-name">G7 Log Transportes</span><span class="lead-meta"><span class="chip cadencia">Em Cadência</span> · 2 pend.</span></div>
+      <div class="lead-row"><span class="lead-name">Gouveia Transportes de Cargas</span><span class="lead-meta"><span class="chip cadencia">Em Cadência</span> · 2 pend.</span></div>
+      <div class="lead-row"><span class="lead-name">Henrique Stefani Transporte e Logística</span><span class="lead-meta"><span class="chip cadencia">Em Cadência</span> · 2 pend.</span></div>
+      <div class="lead-row"><span class="lead-name">Jaloto Transportes</span><span class="lead-meta"><span class="chip cadencia">Em Cadência</span> · 2 pend.</span></div>
+      <div class="lead-row"><span class="lead-name">Katu River Transporte de Carga</span><span class="lead-meta"><span class="chip cadencia">Em Cadência</span> · 2 pend.</span></div>
+      <div class="lead-row"><span class="lead-name">Logplan Logística e Planejamento</span><span class="lead-meta"><span class="chip cadencia">Em Cadência</span> · 2 pend.</span></div>
+      <div class="lead-row"><span class="lead-name">LVA Logística e Transportes</span><span class="lead-meta"><span class="chip cadencia">Em Cadência</span> · 2 pend.</span></div>
+      <div class="lead-row"><span class="lead-name">Macan Logística e Transportes</span><span class="lead-meta"><span class="chip cadencia">Em Cadência</span> · 2 pend.</span></div>
+      <div class="lead-row"><span class="lead-name">Marajó Comércio e Transportes</span><span class="lead-meta"><span class="chip cadencia">Em Cadência</span> · 2 pend.</span></div>
+      <div class="lead-row"><span class="lead-name">Mildo Alves Adm.Com. e Transp.</span><span class="lead-meta"><span class="chip cadencia">Em Cadência</span> · 2 pend.</span></div>
+      <div class="lead-row"><span class="lead-name">Minicarga Serviços de Transportes</span><span class="lead-meta"><span class="chip cadencia">Em Cadência</span> · 2 pend.</span></div>
+      <div class="lead-row"><span class="lead-name">Nely Transportes</span><span class="lead-meta"><span class="chip cadencia">Em Cadência</span> · 2 pend.</span></div>
+      <div class="lead-row"><span class="lead-name">Petrominas - MN Logística e Transportes Rodoviários</span><span class="lead-meta"><span class="chip cadencia">Em Cadência</span> · 2 pend.</span></div>
+      <div class="lead-row"><span class="lead-name">Pioneiro Combustíveis</span><span class="lead-meta"><span class="chip cadencia">Em Cadência</span> · 2 pend.</span></div>
+      <div class="lead-row"><span class="lead-name">Pujante Transportes</span><span class="lead-meta"><span class="chip cadencia">Em Cadência</span> · 2 pend.</span></div>
+      <div class="lead-row"><span class="lead-name">Quimitrans Transportes</span><span class="lead-meta"><span class="chip cadencia">Em Cadência</span> · 2 pend.</span></div>
+      <div class="lead-row"><span class="lead-name">Rede HG Combustíveis</span><span class="lead-meta"><span class="chip cadencia">Em Cadência</span> · 2 pend.</span></div>
+      <div class="lead-row"><span class="lead-name">Rodoviário Confiança</span><span class="lead-meta"><span class="chip cadencia">Em Cadência</span> · 2 pend.</span></div>
+      <div class="lead-row"><span class="lead-name">Rodoviário Duarte</span><span class="lead-meta"><span class="chip cadencia">Em Cadência</span> · 2 pend.</span></div>
+      <div class="lead-row"><span class="lead-name">RPZ Transportes</span><span class="lead-meta"><span class="chip cadencia">Em Cadência</span> · 2 pend.</span></div>
+      <div class="lead-row"><span class="lead-name">Transglobal Serviços</span><span class="lead-meta"><span class="chip cadencia">Em Cadência</span> · 2 pend.</span></div>
+      <div class="lead-row"><span class="lead-name">Transguto Transporte Rodoviário</span><span class="lead-meta"><span class="chip cadencia">Em Cadência</span> · 2 pend.</span></div>
+      <div class="lead-row"><span class="lead-name">Transkompa</span><span class="lead-meta"><span class="chip cadencia">Em Cadência</span> · 2 pend.</span></div>
+      <div class="lead-row"><span class="lead-name">TransLC Transportes</span><span class="lead-meta"><span class="chip cadencia">Em Cadência</span> · 2 pend.</span></div>
+      <div class="lead-row"><span class="lead-name">Transliquido Transportes</span><span class="lead-meta"><span class="chip cadencia">Em Cadência</span> · 2 pend.</span></div>
+      <div class="lead-row"><span class="lead-name">Translivi Transportadora</span><span class="lead-meta"><span class="chip cadencia">Em Cadência</span> · 2 pend.</span></div>
+      <div class="lead-row"><span class="lead-name">Transmare Transp. Marít. de Deriv. Pet.</span><span class="lead-meta"><span class="chip cadencia">Em Cadência</span> · 2 pend.</span></div>
+      <div class="lead-row"><span class="lead-name">Transmasut Transportes</span><span class="lead-meta"><span class="chip cadencia">Em Cadência</span> · 2 pend.</span></div>
+      <div class="lead-row"><span class="lead-name">Transmel - Transportes Menelli</span><span class="lead-meta"><span class="chip cadencia">Em Cadência</span> · 2 pend.</span></div>
+      <div class="lead-row"><span class="lead-name">Transpanorama Transportes</span><span class="lead-meta"><span class="chip cadencia">Em Cadência</span> · 2 pend.</span></div>
+      <div class="lead-row"><span class="lead-name">Transpel - Transportes de Petróleo</span><span class="lead-meta"><span class="chip cadencia">Em Cadência</span> · 2 pend.</span></div>
+      <div class="lead-row"><span class="lead-name">Transpodiesel</span><span class="lead-meta"><span class="chip cadencia">Em Cadência</span> · 2 pend.</span></div>
+      <div class="lead-row"><span class="lead-name">Transportadora Imaculado Coração de Maria</span><span class="lead-meta"><span class="chip cadencia">Em Cadência</span> · 2 pend.</span></div>
+      <div class="lead-row"><span class="lead-name">Transportadora Meztra</span><span class="lead-meta"><span class="chip cadencia">Em Cadência</span> · 2 pend.</span></div>
+      <div class="lead-row"><span class="lead-name">Transportadora Moscato Transporte Rodoviário</span><span class="lead-meta"><span class="chip cadencia">Em Cadência</span> · 2 pend.</span></div>
+      <div class="lead-row"><span class="lead-name">Transportadora Nova União</span><span class="lead-meta"><span class="chip cadencia">Em Cadência</span> · 2 pend.</span></div>
+      <div class="lead-row"><span class="lead-name">Transportadora Planalto</span><span class="lead-meta"><span class="chip cadencia">Em Cadência</span> · 2 pend.</span></div>
+      <div class="lead-row"><span class="lead-name">Transportadora Presidente</span><span class="lead-meta"><span class="chip cadencia">Em Cadência</span> · 2 pend.</span></div>
+      <div class="lead-row"><span class="lead-name">Transportadora Rolim</span><span class="lead-meta"><span class="chip cadencia">Em Cadência</span> · 2 pend.</span></div>
+      <div class="lead-row"><span class="lead-name">Transportadora Transleone</span><span class="lead-meta"><span class="chip cadencia">Em Cadência</span> · 2 pend.</span></div>
+      <div class="lead-row"><span class="lead-name">Transporte Rodoviário Gabiju</span><span class="lead-meta"><span class="chip cadencia">Em Cadência</span> · 2 pend.</span></div>
+      <div class="lead-row"><span class="lead-name">Transporte Rodoviário Nordestino</span><span class="lead-meta"><span class="chip cadencia">Em Cadência</span> · 2 pend.</span></div>
+      <div class="lead-row"><span class="lead-name">Transportes Fátima</span><span class="lead-meta"><span class="chip cadencia">Em Cadência</span> · 2 pend.</span></div>
+      <div class="lead-row"><span class="lead-name">Transportes Pimpão</span><span class="lead-meta"><span class="chip cadencia">Em Cadência</span> · 2 pend.</span></div>
+      <div class="lead-row"><span class="lead-name">Work Transportes</span><span class="lead-meta"><span class="chip reuniao">Reunião Agendada</span> · 0 ativ.</span></div>
+    </div>
+    <div class="note">Todas em "Em Cadência / Tentativa de Contato" com 2 atividades pendentes (ligação + WhatsApp), exceto Work Transportes — status avançado no funil mas sem nenhuma atividade registrada no Bitrix24.</div>
+  </div>
+
+  <div class="card">
+    <div class="card-head good">
+      <h2>Receberam contato — pelo menos 1 atividade concluída</h2>
+      <span class="count-pill">32 leads</span>
+    </div>
+    <div class="card-body">
+      <div class="lead-row"><span class="lead-name">ABS Logística e Transportes</span><span class="lead-meta"><span class="chip reuniao">Reunião Agendada</span> · 5 ativ.</span></div>
+      <div class="lead-row"><span class="lead-name">Aluísio Pereira & Cia</span><span class="lead-meta"><span class="chip cadencia">Em Cadência</span> · 4 ativ.</span></div>
+      <div class="lead-row"><span class="lead-name">Cairu Transportes</span><span class="lead-meta"><span class="chip cadencia">Em Cadência</span> · 2 ativ.</span></div>
+      <div class="lead-row"><span class="lead-name">Cerama Transportes</span><span class="lead-meta"><span class="chip cadencia">Em Cadência</span> · 3 ativ.</span></div>
+      <div class="lead-row"><span class="lead-name">Cetral - Ceará Transportes</span><span class="lead-meta"><span class="chip cadencia">Em Cadência</span> · 2 ativ.</span></div>
+      <div class="lead-row"><span class="lead-name">Comav Comércio de Combustíveis</span><span class="lead-meta"><span class="chip cadencia">Em Cadência</span> · 2 ativ.</span></div>
+      <div class="lead-row"><span class="lead-name">Cooperalog</span><span class="lead-meta"><span class="chip cadencia">Em Cadência</span> · 4 ativ.</span></div>
+      <div class="lead-row"><span class="lead-name">Cooperativa de Transp Rodoviários do ABC</span><span class="lead-meta"><span class="chip cadencia">Em Cadência</span> · 4 ativ.</span></div>
+      <div class="lead-row"><span class="lead-name">D Granel Transportes</span><span class="lead-meta"><span class="chip junk">Desqualificado</span> · 2 ativ.</span></div>
+      <div class="lead-row"><span class="lead-name">Sérgio S Gomes</span><span class="lead-meta"><span class="chip cadencia">Em Cadência</span> · 2 ativ.</span></div>
+      <div class="lead-row"><span class="lead-name">Speed Transportes</span><span class="lead-meta"><span class="chip cadencia">Em Cadência</span> · 2 ativ.</span></div>
+      <div class="lead-row"><span class="lead-name">TCS Transportadora de Cargas</span><span class="lead-meta"><span class="chip cadencia">Em Cadência</span> · 3 ativ.</span></div>
+      <div class="lead-row"><span class="lead-name">Trans Energy</span><span class="lead-meta"><span class="chip cadencia">Em Cadência</span> · 2 ativ.</span></div>
+      <div class="lead-row"><span class="lead-name">Transabril</span><span class="lead-meta"><span class="chip cadencia">Em Cadência</span> · 2 ativ.</span></div>
+      <div class="lead-row"><span class="lead-name">Transbahia Transportes</span><span class="lead-meta"><span class="chip cadencia">Em Cadência</span> · 2 ativ.</span></div>
+      <div class="lead-row"><span class="lead-name">Transcodil Transp Com. de Diesel</span><span class="lead-meta"><span class="chip cadencia">Em Cadência</span> · 3 ativ.</span></div>
+      <div class="lead-row"><span class="lead-name">Transdourada Transportes Rodoviários</span><span class="lead-meta"><span class="chip cadencia">Em Cadência</span> · 4 ativ.</span></div>
+      <div class="lead-row"><span class="lead-name">Transportadora American</span><span class="lead-meta"><span class="chip cadencia">Em Cadência</span> · 5 ativ.</span></div>
+      <div class="lead-row"><span class="lead-name">Transportadora Batista</span><span class="lead-meta"><span class="chip cadencia">Em Cadência</span> · 4 ativ.</span></div>
+      <div class="lead-row"><span class="lead-name">Transportadora e Locadora São Carlos</span><span class="lead-meta"><span class="chip cadencia">Em Cadência</span> · 2 ativ.</span></div>
+      <div class="lead-row"><span class="lead-name">Transportadora Nichele</span><span class="lead-meta"><span class="chip cadencia">Em Cadência</span> · 2 ativ.</span></div>
+      <div class="lead-row"><span class="lead-name">Transportadora Pra Frente Brasil</span><span class="lead-meta"><span class="chip cadencia">Em Cadência</span> · 3 ativ.</span></div>
+      <div class="lead-row"><span class="lead-name">Transportadora Transpostos Paulínia</span><span class="lead-meta"><span class="chip cadencia">Em Cadência</span> · 2 ativ.</span></div>
+      <div class="lead-row"><span class="lead-name">Transportes Bochini</span><span class="lead-meta"><span class="chip cadencia">Em Cadência</span> · 2 ativ.</span></div>
+      <div class="lead-row"><span class="lead-name">Transrio Transportes e Logística</span><span class="lead-meta"><span class="chip cadencia">Em Cadência</span> · 3 ativ.</span></div>
+      <div class="lead-row"><span class="lead-name">Transrios</span><span class="lead-meta"><span class="chip junk">Desqualificado</span> · 2 ativ.</span></div>
+      <div class="lead-row"><span class="lead-name">Transtassi</span><span class="lead-meta"><span class="chip cadencia">Em Cadência</span> · 4 ativ.</span></div>
+      <div class="lead-row"><span class="lead-name">Trevo Transportes e Logística</span><span class="lead-meta"><span class="chip cadencia">Em Cadência</span> · 3 ativ.</span></div>
+      <div class="lead-row"><span class="lead-name">TSJ Transportes de Cargas</span><span class="lead-meta"><span class="chip cadencia">Em Cadência</span> · 3 ativ.</span></div>
+      <div class="lead-row"><span class="lead-name">TWM Transportes Especiais</span><span class="lead-meta"><span class="chip cadencia">Em Cadência</span> · 5 ativ.</span></div>
+      <div class="lead-row"><span class="lead-name">V. B. Silva Junior Transportes</span><span class="lead-meta"><span class="chip cadencia">Em Cadência</span> · 6 ativ.</span></div>
+      <div class="lead-row"><span class="lead-name">Vixgas</span><span class="lead-meta"><span class="chip cadencia">Em Cadência</span> · 3 ativ.</span></div>
+    </div>
+  </div>
+
+</div>
+
+<footer>Fonte: Bitrix24 AtlasGR · crm.lead.list (SOURCE_ID=VIBRA_FORUM_2026) + crm.activity.list · dados extraídos em 04/09/2026.</footer>
+
+</body></html>

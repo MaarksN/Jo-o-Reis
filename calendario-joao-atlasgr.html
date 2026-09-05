@@ -414,6 +414,18 @@
         </div>
         <div id="semTrabalhoBox" class="colapsavel-corpo"></div>
       </section>
+
+      <section class="card" id="cardAnaliseSdr">
+        <div class="card-head"><h3>📊 Análise do SDR</h3></div>
+        <div id="analiseSdrConteudo"><p class="nota">Extraia os dados pra ver a leitura automática dos indicadores do mês.</p></div>
+        <a href="calendario-joao-atlasgr-analise-clientes.html" target="_blank" rel="noopener" class="btn-mini" style="margin-top:10px;">📄 Ver análise histórica completa</a>
+      </section>
+
+      <section class="card" id="cardOrgBitrix">
+        <div class="card-head"><h3>🧭 Organização Bitrix — o que falta fazer</h3></div>
+        <div id="orgBitrixConteudo"><p class="nota">Extraia os dados pra ver o que ainda precisa ser feito no Bitrix.</p></div>
+        <a href="Mesa_Tratamento_Joao_Bitrix_Pomodoro_AtlasGR_v1_0.html" target="_blank" rel="noopener" class="btn-mini" style="margin-top:10px;">🖥️ Abrir Mesa de Tratamento</a>
+      </section>
     </div>
 
     <div id="diariaConteudo"></div>
@@ -1733,6 +1745,44 @@
     document.getElementById('diariaConteudo').innerHTML = painelMes(chave, tituloMes(chave), p.funil, p.dias, p.canal, p.sla, p.dealsResumo, p.dealsDetalhe, p.met, p.diasUteis, p.origem, p.origemPorEtapa, p.contatoPorOrigem);
     animarPainel(document.getElementById('diariaConteudo'));
     renderizarSemTrabalho(chave, p.sla, painel.drillExtra.slaDet);
+    renderizarAnaliseSdr(p.met);
+    renderizarOrgBitrix(p.sla);
+  }
+
+  // -------------------------------------------------------------------
+  // Análise automática do SDR: leitura em texto dos indicadores do mês,
+  // pra dar uma resposta rápida sem precisar interpretar os números sozinho.
+  // -------------------------------------------------------------------
+  function renderizarAnaliseSdr(met){
+    const box = document.getElementById('analiseSdrConteudo');
+    if (!box || !met) return;
+    const pontos = [];
+    if (met.leadsNovos === 0) {
+      pontos.push('⚪ Nenhum lead novo registrado neste mês ainda.');
+    } else {
+      pontos.push((met.taxaContato < 30 ? '🔴' : met.taxaContato < 60 ? '🟡' : '🟢') + ` Taxa de contato em ${met.taxaContato}% (${met.leadsTrabalhados} de ${met.leadsNovos} leads novos já trabalhados).`);
+      pontos.push((met.taxaAgendamento < 10 ? '🔴' : met.taxaAgendamento < 20 ? '🟡' : '🟢') + ` Taxa de agendamento em ${met.taxaAgendamento}% dos leads trabalhados.`);
+      if (met.reuniaoAgendada > 0) pontos.push((met.taxaComparecimento < 50 ? '🔴' : '🟢') + ` Show rate de ${met.taxaComparecimento}% nas reuniões agendadas.`);
+      if (met.taxaDesqualificacao > 15) pontos.push(`🔴 Desqualificação alta: ${met.taxaDesqualificacao}% dos leads novos.`);
+    }
+    box.innerHTML = pontos.map(p => `<p class="nota">${p}</p>`).join('');
+  }
+
+  // -------------------------------------------------------------------
+  // Organização do que falta fazer no Bitrix: consolida em um só lugar
+  // leads sem nenhum toque e tarefas atrasadas, pra saber por onde começar.
+  // -------------------------------------------------------------------
+  function renderizarOrgBitrix(sla){
+    const box = document.getElementById('orgBitrixConteudo');
+    if (!box) return;
+    if (sla) window.__ultimoSla = sla;
+    const semTrabalho = window.__ultimoSla ? window.__ultimoSla.semContato : 0;
+    const atrasadas = window.__totalAtrasadas || 0;
+    const pontos = [];
+    pontos.push((semTrabalho > 0 ? '🔴' : '🟢') + ` ${semTrabalho} lead(s) sem nenhum contato ainda este mês.`);
+    pontos.push((atrasadas > 0 ? '🔴' : '🟢') + ` ${atrasadas} tarefa(s) atrasada(s) no Bitrix.`);
+    pontos.push(semTrabalho === 0 && atrasadas === 0 ? '🎉 Tudo em dia — nada pendente de organização agora.' : '👉 Use a Mesa de Tratamento pra tratar cada item, um de cada vez.');
+    box.innerHTML = pontos.map(p => `<p class="nota">${p}</p>`).join('');
   }
 
   // -------------------------------------------------------------------
@@ -1866,6 +1916,8 @@
     const existente = el.querySelector('.contador-atrasadas');
     if (existente) existente.remove();
     if (nAtrasadas > 0) el.insertAdjacentHTML('beforeend', `<span class="tarefa-chip atrasada contador-atrasadas" style="margin-left:4px;">${nAtrasadas}</span>`);
+    window.__totalAtrasadas = nAtrasadas;
+    renderizarOrgBitrix();
   }
 
   function dispararLembretes(){
@@ -2010,6 +2062,8 @@
       document.getElementById('diariaConteudo').innerHTML = painelMes(chave, tituloMes(chave), p.funil, p.dias, p.canal, p.sla, p.dealsResumo, p.dealsDetalhe, p.met, p.diasUteis, p.origem, p.origemPorEtapa, p.contatoPorOrigem);
       atualizarLiveBadge(cacheDoMes.extraidoEm);
       renderizarSemTrabalho(chave, p.sla, cacheDoMes.drillExtra.slaDet);
+      renderizarAnaliseSdr(p.met);
+      renderizarOrgBitrix(p.sla);
     } else {
       document.getElementById('diariaConteudo').innerHTML = `<div class="placeholder-vazio"><div class="p-icon">${svgIcone('sun')}</div><h4>Ainda sem extração de ${tituloMes(chave)}</h4><p>Cole o webhook do Bitrix24 acima e clique em "Extrair agora" pra carregar leads, atividades e o calendário do mês corrente.</p></div>`;
     }
